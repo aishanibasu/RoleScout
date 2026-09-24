@@ -4,7 +4,7 @@
 
 Status: React frontend connected to a FastAPI/SQLite backend; 14 listing sources are connected with daily refresh schedules; all 17 requested sources have visible coverage status.
 Created: September 17, 2026.
-Project location: `/Users/aishanibasu/Downloads/projects/Role Searcher`.
+Project location: `/Users/aishanibasu/Projects/Role Searcher`.
 
 ## Run locally
 
@@ -13,7 +13,7 @@ The app now reads real listings from the backend; it no longer falls back to fic
 ### Backend (terminal 1)
 
 ```bash
-cd "/Users/aishanibasu/Downloads/projects/Role Searcher/backend"
+cd "/Users/aishanibasu/Projects/Role Searcher/backend"
 uv sync
 uv run python -m app.collect point72
 uv run python -m app.collect ares
@@ -25,7 +25,7 @@ The collector saves jobs in `backend/data/roles.sqlite3`. Set `ROLE_SEARCHER_DB`
 ### Frontend (terminal 2)
 
 ```bash
-cd "/Users/aishanibasu/Downloads/projects/Role Searcher/frontend"
+cd "/Users/aishanibasu/Projects/Role Searcher/frontend"
 pnpm install --frozen-lockfile
 pnpm dev
 ```
@@ -37,7 +37,7 @@ The **Search LinkedIn** button below the search box opens LinkedIn Jobs in a new
 ### Automatic refreshes (terminal 3)
 
 ```bash
-cd "/Users/aishanibasu/Downloads/projects/Role Searcher/backend"
+cd "/Users/aishanibasu/Projects/Role Searcher/backend"
 uv run python -m app.scheduler
 ```
 
@@ -45,7 +45,7 @@ Keep this process running for automatic collection every 24 hours. It checks sou
 
 The app shows whether the worker is active, each source’s last successful refresh, and its next due time. A heartbeat expires after 90 seconds if the worker crashes. `GET /scheduler` exposes the same state. `uv run python -m app.scheduler --once` checks due work once without starting a persistent worker.
 
-This is a local process, not an installed macOS login service. Refreshes stop when the worker exits or the computer is off. Process locking currently supports macOS/Linux. A hosted worker or operating-system service can be added for unattended operation.
+A macOS login service is installed for this project and starts the refresh worker automatically. Do not start a second worker manually while it is active. Refreshes pause while logged out, asleep, or powered off; overdue sources are checked after the worker resumes. Process locking supports macOS/Linux. Other machines can run the worker manually using the command above.
 
 ### Validation
 
@@ -116,7 +116,7 @@ The extractor intentionally misses unsupported phrasing, spelled-out experience 
 To reprocess stored descriptions after extractor changes without fetching career sites:
 
 ```bash
-cd "/Users/aishanibasu/Downloads/projects/Role Searcher/backend"
+cd "/Users/aishanibasu/Projects/Role Searcher/backend"
 uv run python -m app.reindex
 ```
 
@@ -423,4 +423,8 @@ uv run python -m app.services --destination data/launchagents
 
 The scheduler agent starts at login and restarts after an exit (60-second throttle). The backup agent runs at login and daily at 10 a.m. local time. macOS may defer scheduled runs during sleep. Neither service runs while logged out or powered off. Logs are under `backend/data/logs/`. Regenerate definitions if the project or Python environment moves.
 
-Installation attempt on September 24: macOS denied the agents access to the Python environment because the project is inside Downloads. The agents were unloaded and disabled to prevent repeated failures at future logins; automatic startup is not active. Moving the project outside protected folders or adjusting macOS privacy permissions is required before reinstallation. Manual backup creation was verified successfully.
+Verified September 24: the project was moved from Downloads to `/Users/aishanibasu/Projects/Role Searcher` to allow background access without changing macOS privacy permissions. The database checksum was unchanged by the move, and the Python environment was rebuilt from `uv.lock`. Both login agents are enabled: the scheduler refreshed Point72 successfully and the backup agent exited successfully after creating a snapshot. The API and frontend remain manually started local development servers; only refreshes and backups start at login.
+
+Service definitions are installed at `~/Library/LaunchAgents/local.rolesearcher.scheduler.plist` and `~/Library/LaunchAgents/local.rolesearcher.backup.plist`. To inspect either service, use `launchctl print gui/$(id -u)/local.rolesearcher.scheduler` or substitute `backup`. The app also shows the scheduler heartbeat under refresh status.
+
+To stop automatic operation, run `launchctl bootout gui/$(id -u)/local.rolesearcher.scheduler` and the equivalent command for `backup`. To also prevent startup at future logins, run `launchctl disable gui/$(id -u)/local.rolesearcher.scheduler` and the equivalent for `backup`. Re-enable with `launchctl enable`, then bootstrap the corresponding plist. Logs retain earlier installation errors as history; inspect current service state and the newest log timestamps when troubleshooting.
