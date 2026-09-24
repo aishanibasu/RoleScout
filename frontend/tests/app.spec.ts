@@ -137,3 +137,25 @@ test('custom study areas can be added, matched, restored and removed', async ({ 
   await page.getByRole('button', { name: 'Remove Areas of study: Actuarial Science', exact: true }).click();
   await expect(page.getByText('25 matching roles', { exact: true })).toBeVisible();
 });
+
+
+test('location filters use country and state only', async ({ page }, info) => {
+  await page.goto('/?city=London');
+  await expect(page.getByText('25 matching roles', { exact: true })).toBeVisible();
+  await expect(page).not.toHaveURL(/city=/);
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
+  await expect(page.locator('details.dropdown summary').filter({ hasText: /^City/ })).toHaveCount(0);
+  await expect(page.locator('details.dropdown summary').filter({ hasText: /^State \/ region/ })).toHaveCount(0);
+  const country = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: /^Country/ }) });
+  const state = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: /^State/ }) });
+  await country.locator('summary').click();
+  await country.getByRole('checkbox', { name: 'United States', exact: true }).check();
+  await state.locator('summary').click();
+  await state.getByRole('checkbox', { name: 'New York', exact: true }).check();
+  await expect(page.getByRole('button', { name: 'Remove State: New York', exact: true })).toBeVisible();
+  await expect(page.getByText('25 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Search LinkedIn' })).toHaveAttribute('href', /location=New\+York%2C\+United\+States/);
+  await page.screenshot({ path: `test-results/country-state-${info.project.name}.png`, fullPage: true });
+  await country.getByRole('button', { name: 'Clear selection', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Remove State: New York', exact: true })).toHaveCount(0);
+});

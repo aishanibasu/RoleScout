@@ -190,8 +190,7 @@ All filters default to **Any**. Long lists are searchable. Multi-select dropdown
 | Areas of study | Multiple | Finance, Economics, Accounting, Business, Computer Science, Data Science, Mathematics, Statistics, Engineering, Physics, Biology, Chemistry, other supported disciplines |
 | Field of interest | Multiple | Finance, Technology, Pharmaceuticals & Biotechnology, Healthcare, Consulting, Research, Operations; expand with source coverage |
 | Country | Multiple | Countries present in indexed listings |
-| State / region | Multiple | Options constrained by selected countries |
-| City | Multiple | Options constrained by selected countries and regions |
+| State | Multiple | Options constrained by selected countries |
 | Work arrangement | Multiple | On-site, hybrid, remote, not specified |
 | Graduation year | Single | Already graduated, current year minus two through current year plus six, other year, not specified; year list advances automatically |
 | Experience level | Multiple | Student, new graduate, entry level, mid-level, senior, manager / leadership, not specified |
@@ -428,3 +427,5 @@ Service definitions are installed at `~/Library/LaunchAgents/local.rolesearcher.
 To stop automatic operation, run `launchctl bootout gui/$(id -u)/local.rolesearcher.scheduler` and the equivalent command for `backup`. To also prevent startup at future logins, run `launchctl disable gui/$(id -u)/local.rolesearcher.scheduler` and the equivalent for `backup`. Re-enable with `launchctl enable`, then bootstrap the corresponding plist. Logs retain earlier installation errors as history; inspect current service state and the newest log timestamps when troubleshooting.
 
 Custom areas of study can be added by typing into the Areas of study search box and pressing Enter or choosing Add. They persist in the search URL and can be removed like preset subjects. Custom subjects match literal subject phrases in degree/major requirements; casual keyword mentions do not confirm education eligibility. Unspecified education remains included by default and excluded by Confirmed matches only.
+
+Location filtering uses Country and State only (state/province equivalents for international locations). City details remain visible on listings, but are no longer a separate filter. Old City URL selections are removed when opening the app. Changing Country clears State selections.

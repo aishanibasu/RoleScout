@@ -19,12 +19,12 @@ const options: Record<string, string[]> = {
   type: ['Internship', 'Full-time', 'Part-time', 'Co-op', 'Graduate program', 'Apprenticeship'],
   major: disciplines,
   interest: ['Finance', 'Technology', 'Pharmaceuticals & Biotechnology', 'Healthcare', 'Consulting', 'Research', 'Operations'],
-  country: [], region: [], city: [],
+  country: [], region: [],
   arrangement: ['On-site', 'Hybrid', 'Remote', 'Not specified'],
   graduation: ['Already graduated', ...Array.from({ length: 9 }, (_, i) => String(year - 2 + i)), 'Other year', 'Not specified'],
   level: ['Student', 'New graduate', 'Entry level', 'Mid-level', 'Senior', 'Manager / leadership', 'Not specified'],
 };
-const labels: Record<string, string> = { company: 'Company', type: 'Opportunity type', major: 'Areas of study', interest: 'Field of interest', country: 'Country', region: 'State / region', city: 'City', arrangement: 'Work arrangement', graduation: 'Graduation year', level: 'Experience level' };
+const labels: Record<string, string> = { company: 'Company', type: 'Opportunity type', major: 'Areas of study', interest: 'Field of interest', country: 'Country', region: 'State', arrangement: 'Work arrangement', graduation: 'Graduation year', level: 'Experience level' };
 function readSearch() {
   const params = new URLSearchParams(location.search);
   return {
@@ -136,7 +136,7 @@ function App() {
     const target = `${location.pathname}${p.size ? '?' + p.toString() : ''}${location.hash}`;
     if (target !== location.pathname + location.search + location.hash) history.pushState(null, '', target);
   }, [filters, query, strict, sort, page]);
-  function update(key: string, values: string[]) { setPage(1); setFilters(f => ({ ...f, [key]: values, ...(key === 'country' ? { region: [], city: [] } : key === 'region' ? { city: [] } : {}) })); }
+  function update(key: string, values: string[]) { setPage(1); setFilters(f => ({ ...f, [key]: values, ...(key === 'country' ? { region: [] } : {}) })); }
   function reset() { setPage(1); setNewOnly(false); setFilters(initialEmpty()); setQuery(''); setStrict(false); setSort('default'); }
   const chosen = Object.entries(filters).flatMap(([k, vs]) => vs.map(v => ({ k, v })));
   const results = jobs;
@@ -151,7 +151,6 @@ function App() {
       if (k === 'company') values = companies;
       if (k === 'country') values = unique(locations.map(j => j.country));
       if (k === 'region') values = unique(locations.filter(j => !filters.country.length || filters.country.includes(j.country)).map(j => j.region));
-      if (k === 'city') values = unique(locations.filter(j => (!filters.country.length || filters.country.includes(j.country)) && (!filters.region.length || filters.region.includes(j.region))).map(j => j.city));
       return <Dropdown key={k} name={k} values={values} selected={filters[k]} onChange={v => update(k, v)}/>;
     })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setPage(1); setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Choose one or more areas of study, or add your own. A role can match any selected subject. Unspecified requirements are included by default; confirmed matches require stated criteria. Review the original listing for full eligibility.</p></div></aside>
     <div className="results"><label className="search"><span aria-hidden="true">⌕</span><input aria-label="Search roles, companies or skills" placeholder="Search roles, companies or skills" value={query} onChange={e => { setPage(1); setQuery(e.target.value); }}/><span className="search-hint">EXPLORE</span></label>

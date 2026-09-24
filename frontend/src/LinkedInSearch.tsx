@@ -8,15 +8,12 @@ export function LinkedInSearch({ query, filters, locations }: {
   locations: Location[];
 }) {
   const [preferredLocation, setPreferredLocation] = useState('');
-  const level = filters.city.length ? 'city' : filters.region.length ? 'region' : 'country';
+  const level = filters.region.length ? 'region' : 'country';
   const choices = [...new Set(filters[level].flatMap(value => {
     const matches = locations.filter(loc => loc[level] === value
-      && (!filters.country.length || filters.country.includes(loc.country))
-      && (level !== 'city' || !filters.region.length || filters.region.includes(loc.region)));
+      && (!filters.country.length || filters.country.includes(loc.country)));
     if (!matches.length) return [value];
-    return matches.map(loc => [...new Set((level === 'city'
-      ? [loc.city, loc.region, loc.country]
-      : level === 'region' ? [loc.region, loc.country] : [loc.country]).filter(Boolean))].join(', '));
+    return matches.map(loc => [...new Set((level === 'region' ? [loc.region, loc.country] : [loc.country]).filter(Boolean))].join(', '));
   }))].sort();
   const selectedLocation = choices.includes(preferredLocation) ? preferredLocation : choices[0] || '';
   const url = new URL('https://www.linkedin.com/jobs/search/');
