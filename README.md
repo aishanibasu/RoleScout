@@ -429,3 +429,12 @@ To stop automatic operation, run `launchctl bootout gui/$(id -u)/local.rolesearc
 Custom areas of study can be added by typing into the Areas of study search box and pressing Enter or choosing Add. They persist in the search URL and can be removed like preset subjects. Custom subjects match literal subject phrases in degree/major requirements; casual keyword mentions do not confirm education eligibility. Unspecified education remains included by default and excluded by Confirmed matches only.
 
 Location filtering uses Country and State only (state/province equivalents for international locations). City details remain visible on listings, but are no longer a separate filter. Old City URL selections are removed when opening the app. Changing Country clears State selections.
+
+
+### Application links and page navigation
+
+Goldman Sachs API identifiers may contain suffixes such as `_GS_CAMPUS` or `_GS_MID_CAREER`; its public numeric role links omit those suffixes. Existing listings and saved applications receive corrected links on read without changing IDs, notes, or verification dates. UUID-based role links are preserved.
+
+US state abbreviations are normalized to full names across employers, including existing records. NY and New York searches return the same state matches; state/country filters must match the same location on multi-location jobs. Older NY search links update to New York in the interface.
+
+Pagination appears above and below results. Up to 12 pages have individual numbered buttons; larger searches show a compact page range and a Go to page input for any page. Selected filters and page numbers persist in the URL and browser history. Results still sort by the selected date/company order, so recently imported batches can group employers together.

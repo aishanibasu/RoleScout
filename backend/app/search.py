@@ -1,5 +1,7 @@
 """Conservative matching: absence of eligibility data is not a positive assertion."""
 
+from .geography import country_name, state_name
+
 
 def matches(job, filters, query="", confirmed=False):
     if filters.get("company") and job["company"] not in filters["company"]:
@@ -24,7 +26,20 @@ def matches(job, filters, query="", confirmed=False):
             return False
     geo = {f: filters.get(f, []) for f in ("city", "region", "country")}
     if any(geo.values()) and not any(
-        all(not values or loc.get(f) in values for f, values in geo.items())
+        all(
+            not values
+            or (
+                any(
+                    state_name(v, loc.get("country")) == state_name(loc.get(f), loc.get("country"))
+                    for v in values
+                )
+                if f == "region"
+                else country_name(loc.get(f)) in [country_name(v) for v in values]
+                if f == "country"
+                else loc.get(f) in values
+            )
+            for f, values in geo.items()
+        )
         for loc in job.get("locations", [])
     ):
         return False

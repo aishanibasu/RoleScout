@@ -108,6 +108,9 @@ def create_app(path=None):
         ]
         for key in ("city", "region", "country"):
             result[key] = sorted({loc[key] for loc in result["locations"] if loc[key]})
+        from .geography import STATE_NAMES
+
+        result["state_aliases"] = STATE_NAMES
         return result
 
     @app.get("/sources")

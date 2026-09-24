@@ -31,9 +31,24 @@ def main():
                     "formattedLocation": "New York",
                 }
             )
-            for i in range(25)
+            for i in range(240)
         ]
+        gs_job = dict(
+            jobs.pop(5),
+            company="Goldman Sachs",
+            external_id="183697_GS_MID_CAREER",
+            url="https://higher.gs.com/roles/183697_GS_MID_CAREER",
+            locations=[
+                {
+                    "city": "New York",
+                    "region": "NY",
+                    "country": "United States",
+                    "raw": "New York, NY",
+                }
+            ],
+        )
         collect(path, lambda: jobs)
+        collect(path, lambda: [gs_job], source_id="gs")
         uvicorn.run(create_app(path), host="127.0.0.1", port=8011)
 
 

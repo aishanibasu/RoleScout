@@ -40,3 +40,5 @@ textarea:focus-visible{outline:3px solid #849d48;outline-offset:3px}
 .refresh-details{max-width:100%}.refresh-details summary{font-size:12px;color:#365242}.refresh-details[open]{flex-basis:100%}.refresh-details .refresh-sources{margin-top:18px}
 
 .add-study{display:block;max-width:100%;margin-top:8px;padding:8px 10px;border:1px solid #cbd8c0;border-radius:6px;background:#edf1e5;text-align:left;overflow-wrap:anywhere;font-size:12px}.custom-study-help{font-size:11px;line-height:1.5;color:#596353}
+
+.pagination{flex-wrap:wrap;gap:12px;border-top:1px solid #e0e5db;margin:16px 0}.page-buttons,.page-slot,.page-jump{display:flex;align-items:center;gap:6px}.page-buttons{flex-wrap:wrap;flex-basis:100%}.pagination .page-slot button{min-width:38px;padding:9px}.pagination button[aria-current=page]{background:#234c3c;color:white}.page-jump input{width:70px;padding:8px;border:1px solid #cbd8c0;border-radius:6px;color:inherit;background:white}.page-jump{flex-wrap:wrap}.pagination button{min-height:40px}
