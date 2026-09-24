@@ -22,6 +22,8 @@ def main():
                         "Job_Description_External__c": (
                             "<p>Bachelor's degree in Mathematics required.</p>"
                             if i == 3
+                            else "<p>Bachelor's degree in Neuroscience required.</p>"
+                            if i == 4
                             else "<p>Research investments. Bachelor's degree in Economics required.</p>"
                         ),
                         "Apply_Now_URL__c": f"https://example.com/jobs/{i}",

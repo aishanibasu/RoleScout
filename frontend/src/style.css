@@ -38,3 +38,5 @@ textarea:focus-visible{outline:3px solid #849d48;outline-offset:3px}
 .search-hint{white-space:nowrap;flex-shrink:0}
 .refresh-status{margin:16px 0 30px;align-items:flex-start;flex-wrap:wrap}
 .refresh-details{max-width:100%}.refresh-details summary{font-size:12px;color:#365242}.refresh-details[open]{flex-basis:100%}.refresh-details .refresh-sources{margin-top:18px}
+
+.add-study{display:block;max-width:100%;margin-top:8px;padding:8px 10px;border:1px solid #cbd8c0;border-radius:6px;background:#edf1e5;text-align:left;overflow-wrap:anywhere;font-size:12px}.custom-study-help{font-size:11px;line-height:1.5;color:#596353}

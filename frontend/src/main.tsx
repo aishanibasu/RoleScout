@@ -24,7 +24,7 @@ const options: Record<string, string[]> = {
   graduation: ['Already graduated', ...Array.from({ length: 9 }, (_, i) => String(year - 2 + i)), 'Other year', 'Not specified'],
   level: ['Student', 'New graduate', 'Entry level', 'Mid-level', 'Senior', 'Manager / leadership', 'Not specified'],
 };
-const labels: Record<string, string> = { company: 'Company', type: 'Opportunity type', major: 'Major', interest: 'Field of interest', country: 'Country', region: 'State / region', city: 'City', arrangement: 'Work arrangement', graduation: 'Graduation year', level: 'Experience level' };
+const labels: Record<string, string> = { company: 'Company', type: 'Opportunity type', major: 'Areas of study', interest: 'Field of interest', country: 'Country', region: 'State / region', city: 'City', arrangement: 'Work arrangement', graduation: 'Graduation year', level: 'Experience level' };
 function readSearch() {
   const params = new URLSearchParams(location.search);
   return {
@@ -41,10 +41,17 @@ function previousVisit() {
 }
 function Dropdown({ name, values, selected, onChange }: { name: string; values: string[]; selected: string[]; onChange: (v: string[]) => void }) {
   const [query, setQuery] = useState('');
+  const custom = name === 'major';
+  const choices = custom ? [...new Set([...values, ...selected])] : values;
+  const candidate = query.trim().replace(/\s+/g, ' ');
+  const canAdd = custom && candidate.length > 0 && candidate.length <= 100 && selected.length < 30 && !choices.some(value => value.toLowerCase() === candidate.toLowerCase());
+  function addCustom() { if (canAdd) { onChange([...selected, candidate]); setQuery(''); } }
   return <details className="dropdown"><summary><span>{labels[name]}<strong>{selected.length ? selected.join(', ') : 'Any'}</strong></span><span aria-hidden="true">⌄</span></summary><div className="menu">
-    {values.length > 6 && <input aria-label={`Search ${labels[name]}`} placeholder="Find an option…" value={query} onChange={e => setQuery(e.target.value)} />}
+    {values.length > 6 && <input aria-label={`Search ${labels[name]}`} placeholder={custom ? "Find or add an area…" : "Find an option…"} maxLength={custom ? 100 : undefined} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && canAdd) { e.preventDefault(); addCustom(); } }} />}
+    {canAdd && <button className="add-study" onClick={addCustom}>Add “{candidate}”</button>}
+    {custom && <p className="custom-study-help">Not listed? Type your area and press Enter or choose Add. Select up to 30.</p>}
     <button className="clear-option" onClick={() => onChange([])}>Clear selection</button>
-    {values.filter(v => v.toLowerCase().includes(query.toLowerCase())).map(v => <label className="option" key={v}><input type={name === 'graduation' ? 'radio' : 'checkbox'} name={name} checked={selected.includes(v)} onChange={() => onChange(name === 'graduation' ? [v] : selected.includes(v) ? selected.filter(x => x !== v) : [...selected, v])}/>{v}</label>)}
+    {choices.filter(v => v.toLowerCase().includes(query.toLowerCase())).map(v => <label className="option" key={v}><input type={name === 'graduation' ? 'radio' : 'checkbox'} name={name} disabled={custom && selected.length >= 30 && !selected.includes(v)} checked={selected.includes(v)} onChange={() => onChange(name === 'graduation' ? [v] : selected.includes(v) ? selected.filter(x => x !== v) : [...selected, v])}/>{v}</label>)}
   </div></details>;
 }
 function App() {
@@ -146,7 +153,7 @@ function App() {
       if (k === 'region') values = unique(locations.filter(j => !filters.country.length || filters.country.includes(j.country)).map(j => j.region));
       if (k === 'city') values = unique(locations.filter(j => (!filters.country.length || filters.country.includes(j.country)) && (!filters.region.length || filters.region.includes(j.region))).map(j => j.city));
       return <Dropdown key={k} name={k} values={values} selected={filters[k]} onChange={v => update(k, v)}/>;
-    })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setPage(1); setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Choose one or more majors, including Mathematics. A role can match any selected major. Unspecified requirements are included by default; confirmed matches require stated criteria. Review the original listing for full eligibility.</p></div></aside>
+    })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setPage(1); setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Choose one or more areas of study, or add your own. A role can match any selected subject. Unspecified requirements are included by default; confirmed matches require stated criteria. Review the original listing for full eligibility.</p></div></aside>
     <div className="results"><label className="search"><span aria-hidden="true">⌕</span><input aria-label="Search roles, companies or skills" placeholder="Search roles, companies or skills" value={query} onChange={e => { setPage(1); setQuery(e.target.value); }}/><span className="search-hint">EXPLORE</span></label>
     <LinkedInSearch query={query} filters={filters} locations={locations}/>
     {lastVisit && <label className="new-filter"><input type="checkbox" checked={newOnly} onChange={e => { setPage(1); setNewOnly(e.target.checked); }}/> New since your last visit ({new Date(lastVisit).toLocaleDateString()})</label>}

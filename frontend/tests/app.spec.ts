@@ -83,16 +83,16 @@ test('filters work on desktop and mobile, with forward navigation and verified s
 });
 
 
-test('one major filter includes Mathematics and clears retired URL filters', async ({ page }, info) => {
+test('areas of study include Mathematics and clears retired URL filters', async ({ page }, info) => {
   await page.goto('/?minor=Finance&area=Business+%26+Finance');
   await expect(page.getByText('25 matching roles', { exact: true })).toBeVisible();
   await expect(page).not.toHaveURL(/minor=|area=/);
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
   await expect(page.locator('details.dropdown summary').filter({ hasText: /^Minor/ })).toHaveCount(0);
-  await expect(page.locator('details.dropdown summary').filter({ hasText: /^Area of study/ })).toHaveCount(0);
-  const major = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: /^Major/ }) });
+  await expect(page.locator('details.dropdown summary').filter({ hasText: /^Major/ })).toHaveCount(0);
+  const major = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: /^Areas of study/ }) });
   await major.locator('summary').click();
-  await major.getByRole('textbox', { name: 'Search Major', exact: true }).fill('math');
+  await major.getByRole('textbox', { name: 'Search Areas of study', exact: true }).fill('math');
   await major.getByRole('checkbox', { name: 'Mathematics', exact: true }).check();
   await page.getByLabel('Match certainty').selectOption('confirmed');
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
@@ -105,5 +105,35 @@ test('one major filter includes Mathematics and clears retired URL filters', asy
   await expect(major.getByRole('checkbox', { name: 'Mathematics', exact: true })).toBeChecked();
   await page.screenshot({ path: `test-results/major-${info.project.name}.png`, fullPage: true });
   await major.getByRole('checkbox', { name: 'Economics', exact: true }).check();
+  await expect(page.getByText('24 matching roles', { exact: true })).toBeVisible();
+});
+
+
+test('custom study areas can be added, matched, restored and removed', async ({ page }, info) => {
+  await page.goto('/');
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
+  const studies = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: /^Areas of study/ }) });
+  await studies.locator('summary').click();
+  const input = page.getByRole('textbox', { name: 'Search Areas of study', exact: true });
+  await input.fill('  Neuroscience  ');
+  await input.press('Enter');
+  await page.getByLabel('Match certainty').selectOption('confirmed');
+  await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Research Analyst 04', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Remove Areas of study: Neuroscience', exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
+  await studies.locator('summary').click();
+  await expect(studies.getByRole('checkbox', { name: 'Neuroscience', exact: true })).toBeChecked();
+  await input.fill('neuroscience');
+  await expect(studies.getByRole('button', { name: /Add “/ })).toHaveCount(0);
+  await input.fill('Actuarial Science');
+  await page.screenshot({ path: `test-results/custom-studies-${info.project.name}.png`, fullPage: true });
+  await studies.getByRole('button', { name: 'Add “Actuarial Science”' }).click();
+  await expect(studies.getByRole('checkbox', { name: 'Actuarial Science', exact: true })).toBeChecked();
+  await page.getByRole('button', { name: 'Remove Areas of study: Neuroscience', exact: true }).click();
+  await expect(page.getByText('No roles match these preferences.')).toBeVisible();
+  await page.getByRole('button', { name: 'Remove Areas of study: Actuarial Science', exact: true }).click();
   await expect(page.getByText('25 matching roles', { exact: true })).toBeVisible();
 });
