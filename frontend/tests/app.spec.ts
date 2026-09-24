@@ -81,3 +81,29 @@ test('filters work on desktop and mobile, with forward navigation and verified s
   await expect(page.getByLabel('Sort by')).toHaveValue('verified');
   await expect(page.getByText('25 matching roles', { exact: true })).toBeVisible();
 });
+
+
+test('one major filter includes Mathematics and clears retired URL filters', async ({ page }, info) => {
+  await page.goto('/?minor=Finance&area=Business+%26+Finance');
+  await expect(page.getByText('25 matching roles', { exact: true })).toBeVisible();
+  await expect(page).not.toHaveURL(/minor=|area=/);
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
+  await expect(page.locator('details.dropdown summary').filter({ hasText: /^Minor/ })).toHaveCount(0);
+  await expect(page.locator('details.dropdown summary').filter({ hasText: /^Area of study/ })).toHaveCount(0);
+  const major = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: /^Major/ }) });
+  await major.locator('summary').click();
+  await major.getByRole('textbox', { name: 'Search Major', exact: true }).fill('math');
+  await major.getByRole('checkbox', { name: 'Mathematics', exact: true }).check();
+  await page.getByLabel('Match certainty').selectOption('confirmed');
+  await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Research Analyst 03', exact: true })).toBeVisible();
+  await expect(page).toHaveURL(/major=Mathematics/);
+  await page.reload();
+  await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
+  await major.locator('summary').click();
+  await expect(major.getByRole('checkbox', { name: 'Mathematics', exact: true })).toBeChecked();
+  await page.screenshot({ path: `test-results/major-${info.project.name}.png`, fullPage: true });
+  await major.getByRole('checkbox', { name: 'Economics', exact: true }).check();
+  await expect(page.getByText('25 matching roles', { exact: true })).toBeVisible();
+});

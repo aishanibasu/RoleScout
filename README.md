@@ -106,7 +106,7 @@ The UI includes coverage status, dropdown filters, pagination, eligibility evide
 
 Descriptions now pass through a shared, versioned extractor during collection. The job detail view shows the source excerpts and distinguishes stated criteria, preferred qualifications, inferred levels, and provisional matches.
 
-- **Study subjects:** recognized within degree/major statements, not from arbitrary mentions of finance or technology in the description. Each subject maps to a broad study area. Preferred subjects and related-field/equivalent-experience alternatives remain visible. A minor or broad study-area match does not confirm a degree requirement.
+- **Study subjects:** recognized within degree/major statements, not from arbitrary mentions of finance or technology in the description. Each subject maps to a broad study area. Preferred subjects and related-field/equivalent-experience alternatives remain visible. The interface uses one Major filter. Legacy minor and broad-area API matching remains available for compatibility but is not sent by the interface.
 - **Graduation:** supports exact graduating-class years and explicit “between Month YYYY and Month YYYY” windows. Program years in titles are ignored. Year selections overlapping only part of a window require month-level review and are excluded from confirmed-only results. Distinct conflicting windows remain unknown.
 - **Experience:** extracts numeric year requirements at the beginning of a requirement line, preserving ranges and preferred wording. Corporate biographies are excluded. When one unambiguous stated range is available, minimums of 0–2, 3–5, and 6+ years suggest Entry level, Mid-level, and Senior respectively. These labels are inferred, never confirmed eligibility; bounded ranges spanning categories remain unclassified. Existing student/graduate labels are preserved.
 - **Search explanations:** education, graduation, opportunity type, work arrangement, and experience selections receive matching explanations in job details. Confirmed matches mean direct support for the selected criteria, not a guarantee that every qualification is satisfied.
@@ -163,7 +163,7 @@ Initial source coverage focuses on investment banks, investment managers, hedge 
 
 - Collect publicly available listings from the sources in the source registry below, starting with a small working subset and expanding in stages.
 - Normalize titles, companies, locations, education requirements, graduation windows, and experience requirements.
-- Provide dropdown filters for opportunity type, major, minor, area of study, field of interest, location, graduation year, and experience level.
+- Provide dropdown filters for opportunity type, major, field of interest, location, graduation year, and experience level.
 - Display searchable, paginated results with original application links and freshness information.
 - Merge duplicate postings while retaining source attribution.
 - Support browsing without an account.
@@ -188,8 +188,6 @@ All filters default to **Any**. Long lists are searchable. Multi-select dropdown
 | --- | --- | --- |
 | Opportunity type | Multiple | Internship, full-time, part-time, co-op, graduate program, apprenticeship |
 | Major | Multiple | Finance, Economics, Accounting, Business, Computer Science, Data Science, Mathematics, Statistics, Engineering, Physics, Biology, Chemistry, other supported disciplines |
-| Minor | Multiple | Same discipline taxonomy as major; optional; no minor required |
-| Area of study | Multiple | Business & Finance, Computing & Data, Mathematics & Statistics, Engineering, Natural Sciences, Health & Life Sciences, Social Sciences, Arts & Humanities, Interdisciplinary |
 | Field of interest | Multiple | Finance, Technology, Pharmaceuticals & Biotechnology, Healthcare, Consulting, Research, Operations; expand with source coverage |
 | Country | Multiple | Countries present in indexed listings |
 | State / region | Multiple | Options constrained by selected countries |
@@ -203,8 +201,8 @@ Optional secondary dropdowns: company, employer industry, job function, degree l
 ### Matching rules
 
 - Use OR between selected values within one dropdown and AND between independent filters.
-- Treat major, minor, and broad area of study as a combined education profile: a match to any selected discipline can establish relevance. Selecting a minor must not imply the applicant holds a degree in that subject.
-- Distinguish explicit education requirements from inferred relevance. A related major is not proof of eligibility, and a minor cannot satisfy an explicitly required major.
+- Use one multi-select Major filter, including Mathematics. Match any selected major; keep explicit degree requirements distinct from inferred relevance. Retired Minor and Area of study URL parameters are removed when opening the app.
+- Distinguish explicit education requirements from inferred relevance. A related major is not proof of eligibility.
 - Field of interest may match employer industry or job function. For example, Technology can surface software engineering at an investment bank. Display which attribute matched.
 - Preserve distinctions between employer industry (financial services) and job function (software engineering).
 - Compare graduation year with explicit eligibility dates or years. An internship's calendar year is not necessarily the required graduation year.

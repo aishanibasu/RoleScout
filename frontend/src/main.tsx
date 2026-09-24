@@ -17,15 +17,14 @@ const year = new Date().getFullYear();
 const options: Record<string, string[]> = {
   company: [],
   type: ['Internship', 'Full-time', 'Part-time', 'Co-op', 'Graduate program', 'Apprenticeship'],
-  major: disciplines, minor: disciplines,
-  area: ['Business & Finance', 'Computing & Data', 'Mathematics & Statistics', 'Engineering', 'Natural Sciences', 'Health & Life Sciences', 'Social Sciences', 'Arts & Humanities', 'Interdisciplinary'],
+  major: disciplines,
   interest: ['Finance', 'Technology', 'Pharmaceuticals & Biotechnology', 'Healthcare', 'Consulting', 'Research', 'Operations'],
   country: [], region: [], city: [],
   arrangement: ['On-site', 'Hybrid', 'Remote', 'Not specified'],
   graduation: ['Already graduated', ...Array.from({ length: 9 }, (_, i) => String(year - 2 + i)), 'Other year', 'Not specified'],
   level: ['Student', 'New graduate', 'Entry level', 'Mid-level', 'Senior', 'Manager / leadership', 'Not specified'],
 };
-const labels: Record<string, string> = { company: 'Company', type: 'Opportunity type', major: 'Major', minor: 'Minor', area: 'Area of study', interest: 'Field of interest', country: 'Country', region: 'State / region', city: 'City', arrangement: 'Work arrangement', graduation: 'Graduation year', level: 'Experience level' };
+const labels: Record<string, string> = { company: 'Company', type: 'Opportunity type', major: 'Major', interest: 'Field of interest', country: 'Country', region: 'State / region', city: 'City', arrangement: 'Work arrangement', graduation: 'Graduation year', level: 'Experience level' };
 function readSearch() {
   const params = new URLSearchParams(location.search);
   return {
@@ -147,7 +146,7 @@ function App() {
       if (k === 'region') values = unique(locations.filter(j => !filters.country.length || filters.country.includes(j.country)).map(j => j.region));
       if (k === 'city') values = unique(locations.filter(j => (!filters.country.length || filters.country.includes(j.country)) && (!filters.region.length || filters.region.includes(j.region))).map(j => j.city));
       return <Dropdown key={k} name={k} values={values} selected={filters[k]} onChange={v => update(k, v)}/>;
-    })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setPage(1); setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Study selections match any chosen discipline. Unspecified requirements are included by default. See source coverage above for connected employers and limits. Minor and broad study-area matches need review; inferred experience levels are labeled.</p></div></aside>
+    })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setPage(1); setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Choose one or more majors, including Mathematics. A role can match any selected major. Unspecified requirements are included by default; confirmed matches require stated criteria. Review the original listing for full eligibility.</p></div></aside>
     <div className="results"><label className="search"><span aria-hidden="true">⌕</span><input aria-label="Search roles, companies or skills" placeholder="Search roles, companies or skills" value={query} onChange={e => { setPage(1); setQuery(e.target.value); }}/><span className="search-hint">EXPLORE</span></label>
     <LinkedInSearch query={query} filters={filters} locations={locations}/>
     {lastVisit && <label className="new-filter"><input type="checkbox" checked={newOnly} onChange={e => { setPage(1); setNewOnly(e.target.checked); }}/> New since your last visit ({new Date(lastVisit).toLocaleDateString()})</label>}

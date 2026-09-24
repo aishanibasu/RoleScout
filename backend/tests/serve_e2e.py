@@ -19,7 +19,11 @@ def main():
                     "job": {
                         "Job_Code__c": f"E2E-{i}",
                         "Name": f"Research Analyst {i:02d}",
-                        "Job_Description_External__c": "<p>Research investments. Bachelor's degree in Economics required.</p>",
+                        "Job_Description_External__c": (
+                            "<p>Bachelor's degree in Mathematics required.</p>"
+                            if i == 3
+                            else "<p>Research investments. Bachelor's degree in Economics required.</p>"
+                        ),
                         "Apply_Now_URL__c": f"https://example.com/jobs/{i}",
                     },
                     "formattedLocation": "New York",
