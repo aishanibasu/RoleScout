@@ -1,0 +1,19 @@
+[project]
+name = "role-searcher"
+version = "0.2.0"
+requires-python = ">=3.9"
+dependencies = ["fastapi>=0.128,<0.129", "httpx>=0.28,<0.29", "uvicorn>=0.39,<0.40", "python-dotenv>=1,<2"]
+
+[dependency-groups]
+dev = ["pytest>=8,<9", "ruff>=0.12"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

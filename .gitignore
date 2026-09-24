@@ -1,0 +1,12 @@
+# Local secrets; examples must contain placeholders only.
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Tool caches
+.ruff_cache/
+.DS_Store
+*.sqlite3
+*.sqlite3-*
+*.log
