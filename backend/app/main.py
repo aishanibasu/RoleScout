@@ -24,6 +24,7 @@ FILTER_KEYS = (
     "arrangement",
     "graduation",
     "level",
+    "deadline",
 )
 
 

@@ -148,7 +148,9 @@ def serialize(row):
 
     if row["source_id"] == "gs":
         item["url"] = item["source_url"] = application_url(row["external_id"])
-    return normalize_locations(item)
+    from .deadlines import with_deadline
+
+    return with_deadline(normalize_locations(item))
 
 
 def active_jobs(path=None):

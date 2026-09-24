@@ -193,3 +193,31 @@ test('NY includes other employers and Goldman uses its public link', async ({ pa
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
   await expect(page.locator('article.job .company')).toContainText('Point72');
 });
+
+test('deadline flags, filtering and URL persistence', async ({ page }, info) => {
+  await page.goto('/');
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
+  const dropdown = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: 'Application deadline' }) });
+  await dropdown.locator('summary').click();
+  await dropdown.getByRole('radio', { name: 'Has a deadline', exact: true }).check();
+  await expect(page.getByText('3 matching roles', { exact: true })).toBeVisible();
+  await expect(page.locator('.deadline-flag')).toHaveCount(3);
+  await dropdown.getByRole('radio', { name: 'Closing within 7 days', exact: true }).check();
+  await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+  await expect(page.locator('.deadline-flag')).toContainText('Closing soon');
+  await page.reload();
+  await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'View details' }).click();
+  await expect(page.getByText('Applications close on', { exact: false }).first()).toBeVisible();
+  await page.locator('.job').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `test-results/deadline-${info.project.name}.png` });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Remove Application deadline: Closing within 7 days' }).click();
+  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await page.goto('/?deadline=Deadline+passed');
+  await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+  await expect(page.locator('.deadline-flag')).toContainText('Stated deadline passed');
+  await page.goto('/?deadline=No+date+found');
+  await expect(page.getByText('237 matching roles', { exact: true })).toBeVisible();
+  await expect(page.locator('.deadline-flag')).toHaveCount(0);
+});

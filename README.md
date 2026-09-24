@@ -438,3 +438,12 @@ Goldman Sachs API identifiers may contain suffixes such as `_GS_CAMPUS` or `_GS_
 US state abbreviations are normalized to full names across employers, including existing records. NY and New York searches return the same state matches; state/country filters must match the same location on multi-location jobs. Older NY search links update to New York in the interface.
 
 Pagination appears above and below results. Up to 12 pages have individual numbered buttons; larger searches show a compact page range and a Go to page input for any page. Selected filters and page numbers persist in the URL and browser history. Results still sort by the selected date/company order, so recently imported batches can group employers together.
+
+Application deadlines are extracted from explicit closing-date phrases in imported
+job descriptions, including existing records. The app accepts ISO dates and English
+month names with a full year; ambiguous numeric dates, missing years, and conflicting
+multiple deadlines remain unknown. Cards flag known dates and the Application deadline
+filter offers known dates, closing within seven days (including today), passed dates,
+and no date found. Day-based status uses the current UTC date. The original listing
+remains authoritative for cutoff times, timezones, and early closure. A passed date
+does not automatically change a listing's source status.

@@ -1,6 +1,7 @@
 """Run a real API with a disposable database, never the user's job index."""
 
 import tempfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import uvicorn
@@ -33,6 +34,9 @@ def main():
             )
             for i in range(240)
         ]
+        today = datetime.now(timezone.utc).date()
+        for index, days in ((0, 3), (1, 30), (2, -2)):
+            jobs[index]["description"] += f" Applications close on {today + timedelta(days=days)}."
         gs_job = dict(
             jobs.pop(5),
             company="Goldman Sachs",

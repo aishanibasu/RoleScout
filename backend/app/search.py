@@ -4,6 +4,16 @@ from .geography import country_name, state_name
 
 
 def matches(job, filters, query="", confirmed=False):
+    deadline = filters.get("deadline", [])
+    status = job.get("deadline_status", "unknown")
+    if deadline and not any(
+        (choice == "Has a deadline" and status != "unknown")
+        or (choice == "Closing within 7 days" and status == "soon")
+        or (choice == "Deadline passed" and status == "passed")
+        or (choice == "No date found" and status == "unknown")
+        for choice in deadline
+    ):
+        return False
     if filters.get("company") and job["company"] not in filters["company"]:
         return False
     if (
