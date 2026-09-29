@@ -447,3 +447,9 @@ filter offers known dates, closing within seven days (including today), passed d
 and no date found. Day-based status uses the current UTC date. The original listing
 remains authoritative for cutoff times, timezones, and early closure. A passed date
 does not automatically change a listing's source status.
+
+Search controls are staged: choose filters, enter search text, then click **Show
+results** to apply them together. Until submission, the existing results, page,
+and URL remain unchanged. Reset and removing selection chips also wait for
+submission. Page navigation and sorting use the last applied criteria. Browser
+back/forward restores the applied search and its controls.

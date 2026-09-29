@@ -79,6 +79,8 @@ function App() {
   const [saving, setSaving] = useState<number | null>(null);
   const [lastVisit] = useState(previousVisit);
   const [newOnly, setNewOnly] = useState(false);
+  const [applied, setApplied] = useState({ filters: initial.filters, query: initial.query, strict: initial.strict, newOnly: false });
+  const pending = JSON.stringify({ filters, query, strict, newOnly }) !== JSON.stringify(applied);
   const refreshTracked = useCallback(async () => {
     const response = await fetch('/api/tracked');
     if (!response.ok) throw new Error('Application tracker is unavailable. Please retry.');
@@ -89,7 +91,8 @@ function App() {
     try { localStorage.setItem('role-searcher-last-visit', new Date().toISOString()); } catch { /* Browsing works without storage. */ }
     const restore = () => {
       const next = readSearch(); setFilters(next.filters); setQuery(next.query);
-      setStrict(next.strict); setSort(next.sort); setPage(next.page);
+      setStrict(next.strict); setSort(next.sort); setPage(next.page); setNewOnly(false);
+      setApplied({ filters: next.filters, query: next.query, strict: next.strict, newOnly: false });
     };
     addEventListener('popstate', restore);
     return () => removeEventListener('popstate', restore);
@@ -109,9 +112,14 @@ function App() {
         const sources = await s.json() as {name: string; job_count: number; stale: boolean; status: string}[];
         setLocations(facets.locations);
         setCompanies(facets.company);
-        setFilters(current => (!current.country.length || current.country.includes('United States'))
+        const normalize = (current: Filters) => (!current.country.length || current.country.includes('United States'))
           ? { ...current, region: [...new Set(current.region.map(value => facets.state_aliases?.[value.toUpperCase()] || value))] }
-          : current);
+          : current;
+        setFilters(normalize);
+        setApplied(current => {
+          const normalized = normalize(current.filters);
+          return JSON.stringify(normalized) === JSON.stringify(current.filters) ? current : { ...current, filters: normalized };
+        });
         const active = sources.filter(s => s.job_count > 0);
         setSourceSummary(active.length ? `${active.map(s => s.name).join(', ')} · ${active.reduce((n, s) => n + s.job_count, 0)} indexed jobs${active.some(s => s.stale) ? ' · Refresh overdue or failed; some listings may be stale.' : ''}` : 'No jobs collected yet. Source connections are being prepared.');
       }).catch(e => { if (e.name !== 'AbortError') setSourceSummary('Source status unavailable.'); });
@@ -121,9 +129,9 @@ function App() {
     const controller = new AbortController();
     setLoading(true); setError('');
     const timer = setTimeout(() => {
-      const p = new URLSearchParams({q: query, certainty: strict ? 'confirmed' : 'all', sort, page: String(page), page_size: '20'});
-      if (newOnly && lastVisit) p.set('since', lastVisit);
-      Object.entries(filters).forEach(([k, vs]) => vs.forEach(v => p.append(k, v)));
+      const p = new URLSearchParams({q: applied.query, certainty: applied.strict ? 'confirmed' : 'all', sort, page: String(page), page_size: '20'});
+      if (applied.newOnly && lastVisit) p.set('since', lastVisit);
+      Object.entries(applied.filters).forEach(([k, vs]) => vs.forEach(v => p.append(k, v)));
       fetch('/api/jobs?' + p, {signal: controller.signal}).then(async response => {
         if (!response.ok) throw new Error('Could not load jobs. Check that the backend is running.');
         const data = await response.json();
@@ -132,19 +140,20 @@ function App() {
       }).catch(e => { if (e.name !== 'AbortError') { setError(e.message); setJobs([]); setTotal(0); setLoading(false); } });
     }, 200);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [filters, query, strict, sort, page, reload, newOnly, lastVisit]);
+  }, [applied, sort, page, reload, lastVisit]);
   useEffect(() => {
     const p = new URLSearchParams();
-    Object.entries(filters).forEach(([k, vs]) => vs.forEach(v => p.append(k, v)));
-    if (query) p.set('q', query);
-    if (strict) p.set('certainty', 'confirmed');
+    Object.entries(applied.filters).forEach(([k, vs]) => vs.forEach(v => p.append(k, v)));
+    if (applied.query) p.set('q', applied.query);
+    if (applied.strict) p.set('certainty', 'confirmed');
     if (sort !== 'default') p.set('sort', sort);
     if (page > 1) p.set('page', String(page));
     const target = `${location.pathname}${p.size ? '?' + p.toString() : ''}${location.hash}`;
     if (target !== location.pathname + location.search + location.hash) history.pushState(null, '', target);
-  }, [filters, query, strict, sort, page]);
-  function update(key: string, values: string[]) { setPage(1); setFilters(f => ({ ...f, [key]: values, ...(key === 'country' ? { region: [] } : {}) })); }
-  function reset() { setPage(1); setNewOnly(false); setFilters(initialEmpty()); setQuery(''); setStrict(false); setSort('default'); }
+  }, [applied, sort, page]);
+  function update(key: string, values: string[]) { setFilters(f => ({ ...f, [key]: values, ...(key === 'country' ? { region: [] } : {}) })); }
+  function reset() { setNewOnly(false); setFilters(initialEmpty()); setQuery(''); setStrict(false); }
+  function applyFilters() { setApplied({ filters, query, strict, newOnly }); setPage(1); setExpanded(null); }
   const chosen = Object.entries(filters).flatMap(([k, vs]) => vs.map(v => ({ k, v })));
   const results = jobs;
   return <><header><a className="brand" href={location.pathname}><span className="brand-icon">r.</span>role searcher<span className="beta">EARLY PREVIEW</span></a><a className="header-link" href="#opportunities">Explore opportunities ↗</a></header>
@@ -159,12 +168,13 @@ function App() {
       if (k === 'country') values = unique(locations.map(j => j.country));
       if (k === 'region') values = unique(locations.filter(j => !filters.country.length || filters.country.includes(j.country)).map(j => j.region));
       return <Dropdown key={k} name={k} values={values} selected={filters[k]} onChange={v => update(k, v)}/>;
-    })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setPage(1); setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Choose one or more areas of study, or add your own. A role can match any selected subject. Unspecified requirements are included by default; confirmed matches require stated criteria. Review the original listing for full eligibility.</p></div></aside>
-    <div className="results"><label className="search"><span aria-hidden="true">⌕</span><input aria-label="Search roles, companies or skills" placeholder="Search roles, companies or skills" value={query} onChange={e => { setPage(1); setQuery(e.target.value); }}/><span className="search-hint">EXPLORE</span></label>
+    })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Choose one or more areas of study, or add your own. A role can match any selected subject. Unspecified requirements are included by default; confirmed matches require stated criteria. Review the original listing for full eligibility.</p></div></aside>
+    <div className="results"><label className="search"><span aria-hidden="true">⌕</span><input aria-label="Search roles, companies or skills" placeholder="Search roles, companies or skills" value={query} onChange={e => { setQuery(e.target.value); }}/><span className="search-hint">EXPLORE</span></label>
+    <div className="apply-filters"><button onClick={applyFilters}>Show results</button><span role="status">{pending ? 'Filters changed. Click Show results to apply them.' : 'Choose your filters, then click Show results.'}</span></div>
     <LinkedInSearch query={query} filters={filters} locations={locations}/>
-    {lastVisit && <label className="new-filter"><input type="checkbox" checked={newOnly} onChange={e => { setPage(1); setNewOnly(e.target.checked); }}/> New since your last visit ({new Date(lastVisit).toLocaleDateString()})</label>}
+    {lastVisit && <label className="new-filter"><input type="checkbox" checked={newOnly} onChange={e => { setNewOnly(e.target.checked); }}/> New since your last visit ({new Date(lastVisit).toLocaleDateString()})</label>}
     <div className="results-heading"><div><h2>Find your next opportunity</h2><p role="status">{loading ? 'Loading jobs…' : `${total} matching roles`}</p></div><label className="sort">Sort by <select value={sort} onChange={e => { setPage(1); setSort(e.target.value); }}><option value="default">First seen: newest</option><option value="company">Company A–Z</option><option value="verified">Most recently verified</option></select></label></div>
-    {!!chosen.length && <div className="chips">{chosen.map(({ k, v }) => <button key={k + v} onClick={() => update(k, filters[k].filter(x => x !== v))} aria-label={`Remove ${labels[k]}: ${v}`}>{labels[k]}: {v} ×</button>)}</div>}
+    {!!chosen.length && <div className="chips" aria-label="Selected filters">{chosen.map(({ k, v }) => <button key={k + v} onClick={() => update(k, filters[k].filter(x => x !== v))} aria-label={`Remove ${labels[k]}: ${v}`}>{labels[k]}: {v} ×</button>)}</div>}
     {!loading && !error && total > 20 && <Pagination page={page} totalPages={Math.ceil(total / 20)} onChange={setPage} position="top"/>}
     {!loading && !error && results.map(job => <article className="job" key={job.id}><div className="job-top"><div className="company-icon">{job.company.split(' ').slice(0, 2).map(s => s[0]).join('')}</div><div className="company">{job.company}<span>{job.source === 'hft' ? 'Via HFT Jobs · Aggregator' : 'Employer career listing'}</span></div><span className="job-type">{job.type}</span></div><h3>{job.title}</h3><DeadlineFlag job={job}/><div className="listing-freshness">First seen {new Date(job.first_seen).toLocaleDateString()} · Verified {new Date(job.last_verified).toLocaleDateString()}{Date.now() - Date.parse(job.last_verified) > 48 * 60 * 60 * 1000 && <strong> · Verification overdue</strong>}</div><div className="job-meta">{job.locations.map(l => [l.city, l.region, l.country].filter(Boolean).join(', ')).join(' · ') || 'Location not specified'} <span> / </span> {job.arrangement}</div><div className="tags"><span>{job.level}{job.evidence.level?.status === 'inferred' ? ' · inferred' : ''}</span>{job.experience_range && <span>{experienceLabel(job.experience_range)}</span>}{job.interest.map(i => <span key={i}>{i}</span>)}<span>{job.graduation.length ? `${job.graduation_window ? 'Graduation window overlaps' : 'Class of'} ${job.graduation.join(' / ')}` : 'Graduation not extracted'}</span></div><div className="job-bottom"><span>{job.studies.length ? job.studies.join(' · ') : 'Degree subjects not extracted'}</span><button disabled={saving !== null || tracked.some(item => item.id === job.id)} onClick={() => saveJob(job)}>{tracked.some(item => item.id === job.id) ? 'Saved ✓' : saving === job.id ? 'Saving…' : 'Save role'}</button><button aria-expanded={expanded === job.id} onClick={() => setExpanded(expanded === job.id ? null : job.id)}>View details {expanded === job.id ? '−' : '↗'}</button></div>{expanded === job.id && <div className="job-detail"><EligibilityDetails job={job}/><h4>Application deadline</h4><p>{job.deadline_evidence || "No unambiguous application closing date found. Check the original listing."}</p><p>Dates are shown as stated by the employer. Check the original application for its cutoff time and timezone; employers may close roles early.</p><h4>Original description</h4><p className="description">{job.description || (job.details_pending ? 'Full description is being retrieved. Check the original application for requirements.' : job.description_note || 'Full requirements are available on the original employer website.')}</p>{job.also_listed_on?.includes('hft') && <p>Also listed on HFT Jobs.</p>}<p><strong>Matching context:</strong> Finance describes the employer’s industry. Other interests and student level may be inferred from source categories or the title. Unspecified requirements are not confirmation of eligibility. Source experience category: {job.source_experience || 'Not specified'}. Last verified: {new Date(job.last_verified).toLocaleString()}.</p>{/^https?:\/\//i.test(job.url) ? <a href={job.url} target="_blank" rel="noreferrer">View original application ↗</a> : <p>Application link unavailable.</p>}</div>}</article>)}
     {!loading && !error && !results.length && <div className="empty"><span>⌕</span><h3>No roles match these preferences.</h3><p>Try broadening your preferences. More employers will be added as source coverage expands.</p><button onClick={reset}>Clear filters and search</button></div>}

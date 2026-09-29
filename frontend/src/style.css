@@ -44,3 +44,5 @@ textarea:focus-visible{outline:3px solid #849d48;outline-offset:3px}
 .pagination{flex-wrap:wrap;gap:12px;border-top:1px solid #e0e5db;margin:16px 0}.page-buttons,.page-slot,.page-jump{display:flex;align-items:center;gap:6px}.page-buttons{flex-wrap:wrap;flex-basis:100%}.pagination .page-slot button{min-width:38px;padding:9px}.pagination button[aria-current=page]{background:#234c3c;color:white}.page-jump input{width:70px;padding:8px;border:1px solid #cbd8c0;border-radius:6px;color:inherit;background:white}.page-jump{flex-wrap:wrap}.pagination button{min-height:40px}
 
 .deadline-flag{display:table;padding:6px 10px;border-radius:6px;background:#edf2e6;color:#284e3e;font-size:13px;font-weight:600}.deadline-flag.soon{background:#fff0cd;color:#704900}.deadline-flag.passed{background:#f8e7e3;color:#853d32}
+
+.apply-filters{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:14px 0 20px}.apply-filters button{background:#214d3d;color:white;border:1px solid #214d3d;border-radius:7px;padding:12px 22px;font:inherit;font-weight:600;cursor:pointer}.apply-filters button:hover{background:#163e30}.apply-filters span{font-size:13px;color:#566650}
