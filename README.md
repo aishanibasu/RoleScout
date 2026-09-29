@@ -458,3 +458,11 @@ Result cards show company, role, a concise eligibility summary, location, deadli
 and the application URL directly. Full source descriptions and the View details
 expander are omitted. Missing criteria remain Not specified; preferred and inferred
 criteria are labeled. Save role remains available on each card.
+
+Early-career searches (Student, New graduate, Entry level) reject clear senior or
+leadership titles and extracted required experience above the 0–2-year entry band,
+even if the source label is missing or inconsistent. Multiple required experience
+clauses are checked independently; preferred experience is not a hard requirement.
+Title-derived levels remain labeled as inferred. Unknown requirements may still
+appear when Include unspecified requirements is selected. Existing older records
+are re-extracted before searching; reindexing preserves source verification dates.

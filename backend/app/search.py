@@ -1,9 +1,12 @@
 """Conservative matching: absence of eligibility data is not a positive assertion."""
 
 from .geography import country_name, state_name
+from .seniority import conflicts_with_early_career
 
 
 def matches(job, filters, query="", confirmed=False):
+    if conflicts_with_early_career(job, filters.get("level", [])):
+        return False
     deadline = filters.get("deadline", [])
     status = job.get("deadline_status", "unknown")
     if deadline and not any(

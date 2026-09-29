@@ -136,6 +136,10 @@ def initialize(path=None):
 
 def serialize(row):
     item = json.loads(row["payload"])
+    from .eligibility import VERSION, enrich
+
+    if item.get("extraction_version") != VERSION:
+        item = enrich(item)
     item.update(
         id=row["id"],
         source=row["source_id"],

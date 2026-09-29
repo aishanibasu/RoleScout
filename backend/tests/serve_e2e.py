@@ -34,6 +34,15 @@ def main():
             )
             for i in range(240)
         ]
+        jobs[10]["title"] = "Managing Director, Investments"
+        jobs[10]["description"] += "\n15+ years of experience in investments."
+        jobs[11]["title"] = "Entry Level Analyst"
+        jobs[11]["level"] = "Entry level"
+        jobs[11]["description"] += "\n0-2 years of experience."
+        jobs[12]["title"] = "Quantitative Developer"
+        jobs[12]["description"] += (
+            "\n5+ years of experience in engineering.\n2+ years of experience in Python."
+        )
         today = datetime.now(timezone.utc).date()
         for index, days in ((0, 3), (1, 30), (2, -2)):
             jobs[index]["description"] += f" Applications close on {today + timedelta(days=days)}."

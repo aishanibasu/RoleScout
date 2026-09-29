@@ -340,3 +340,27 @@ test('eligibility preserves preferred criteria and missing application URLs are 
   await expect(card.locator('.application-url')).toContainText('Unavailable');
   await expect(card.getByRole('link')).toHaveCount(0);
 });
+
+test('early-career filters exclude senior titles and conflicting required experience', async ({ page }, info) => {
+  await page.goto('/?q=Managing+Director');
+  await expect(page.getByRole('heading', { name: 'Managing Director, Investments' })).toBeVisible();
+  await expect(page.locator('.eligibility-summary')).toContainText('15+ years stated');
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
+  const level = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: /^Experience level/ }) });
+  await level.locator('summary').click();
+  await level.getByRole('checkbox', { name: 'New graduate', exact: true }).check();
+  await level.getByRole('checkbox', { name: 'Entry level', exact: true }).check();
+  await page.getByRole('button', { name: 'Show results', exact: true }).click();
+  await expect(page.getByText('No roles match these preferences.')).toBeVisible();
+  const search = page.getByRole('textbox', { name: 'Search roles, companies or skills' });
+  await search.fill('Quantitative Developer');
+  await page.getByRole('button', { name: 'Show results', exact: true }).click();
+  await expect(page.getByText('No roles match these preferences.')).toBeVisible();
+  await search.fill('Entry Level Analyst');
+  await page.getByRole('button', { name: 'Show results', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Entry Level Analyst' })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Entry Level Analyst' })).toBeVisible();
+  await page.locator('article.job').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `test-results/early-career-${info.project.name}.png` });
+});
