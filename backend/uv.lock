@@ -437,7 +437,7 @@ wheels = [
 ]
 
 [[package]]
-name = "role-searcher"
+name = "role-scout"
 version = "0.2.0"
 source = { virtual = "." }
 dependencies = [

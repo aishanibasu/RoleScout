@@ -29,6 +29,6 @@ export function LinkedInSearch({ query, filters, locations }: {
         </select>
       </label>}
     </div>
-    <p id="linkedin-search-help">Opens in a new tab using your search text{selectedLocation ? ` and ${selectedLocation}` : ''}. {selectedLocation ? 'Other filters stay in Role Searcher.' : 'Choose a location on LinkedIn. Other filters stay in Role Searcher.'}</p>
+    <p id="linkedin-search-help">Opens in a new tab using your search text{selectedLocation ? ` and ${selectedLocation}` : ''}. {selectedLocation ? 'Other filters stay in RoleScout.' : 'Choose a location on LinkedIn. Other filters stay in RoleScout.'}</p>
   </div>;
 }

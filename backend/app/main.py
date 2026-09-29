@@ -34,7 +34,7 @@ def create_app(path=None):
         db.initialize(path)
         yield
 
-    app = FastAPI(title="Role Searcher API", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="RoleScout API", version="0.1.0", lifespan=lifespan)
     app.include_router(router(path))
 
     @app.get("/health")

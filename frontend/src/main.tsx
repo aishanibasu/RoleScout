@@ -153,7 +153,7 @@ function App() {
   function applyFilters() { setApplied({ filters, query, strict, newOnly }); setPage(1); }
   const chosen = Object.entries(filters).flatMap(([k, vs]) => vs.map(v => ({ k, v })));
   const results = jobs;
-  return <><header><a className="brand" href={location.pathname}><span className="brand-icon">r.</span>role searcher<span className="beta">EARLY PREVIEW</span></a><a className="header-link" href="#opportunities">Explore opportunities ↗</a></header>
+  return <><header><a className="brand" href={location.pathname}><span className="brand-icon">r.</span>RoleScout<span className="beta">EARLY PREVIEW</span></a><a className="header-link" href="#opportunities">Explore opportunities ↗</a></header>
     <main><section className="hero"><div><div className="eyebrow">YOUR NEXT CHAPTER STARTS HERE</div><h1>Big ambitions.<br/><em>Better possibilities.</em></h1><p>Find a role that fits what you study, what you love,<br className="desktop"/> and where you want to go.</p></div><div className="hero-note"><span className="orbit">↗</span><span>One search.<br/>A world of possibilities.</span></div></section>
     <div className="notice"><span>◉</span><div><strong>Live source coverage.</strong> {sourceSummary} Requirements are shown only where known; review the original listing before applying.</div><span className="sample-tag">LIVE INDEX</span></div>
     <nav className="view-tabs" aria-label="Workspace"><button aria-pressed={view === 'explore'} onClick={() => setView('explore')}>Explore roles</button><button aria-pressed={view === 'tracker'} onClick={() => setView('tracker')}>Saved & applications ({tracked.length})</button></nav>
@@ -178,7 +178,7 @@ function App() {
     {loading && <p role="status">Loading current listings…</p>}
     {error && <div className="empty" role="alert"><h3>Jobs are temporarily unavailable.</h3><p>{error}</p><button onClick={() => setReload(x => x + 1)}>Try again</button></div>}
     {!loading && !error && total > 20 && <Pagination page={page} totalPages={Math.ceil(total / 20)} onChange={setPage} position="bottom"/>}
-    <p className="results-footer">A little direction for your next big step.</p></div></section></>}</main><footer><span>role searcher</span><span>Built for possibility. · Live job search</span></footer></>;
+    <p className="results-footer">A little direction for your next big step.</p></div></section></>}</main><footer><span>RoleScout</span><span>Built for possibility. · Live job search</span></footer></>;
 }
 function initialEmpty(): Filters { return Object.fromEntries(Object.keys(options).map(k => [k, []])); }
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);

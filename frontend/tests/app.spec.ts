@@ -9,7 +9,11 @@ test('search, pagination, URL navigation, details and layout', async ({ page }, 
   const errors: string[] = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.goto('/');
+  await expect(page).toHaveTitle('RoleScout — Find your next chapter');
+  await expect(page.locator('header .brand')).toContainText('RoleScout');
+  await expect(page.locator('footer')).toContainText('RoleScout');
   await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await page.screenshot({ path: `test-results/rolescout-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next →' }).first().click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page.getByText('Page 2 of 12').first()).toBeVisible();

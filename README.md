@@ -1,4 +1,4 @@
-# Role Searcher
+# RoleScout
 
 ## Product plan
 
@@ -32,7 +32,7 @@ pnpm dev
 
 Open the URL printed by Vite. Its `/api` proxy forwards requests to port 8000. The production build needs an equivalent reverse proxy; `pnpm preview` alone does not configure the API connection.
 
-The **Search LinkedIn** button below the search box opens LinkedIn Jobs in a new tab with the current search text and selected location. When multiple locations are selected, choose one in the LinkedIn location dropdown. Without a location selection, choose the location on LinkedIn. Other Role Searcher filters are not transferred, and LinkedIn results are viewed on LinkedIn rather than imported into the local index.
+The **Search LinkedIn** button below the search box opens LinkedIn Jobs in a new tab with the current search text and selected location. When multiple locations are selected, choose one in the LinkedIn location dropdown. Without a location selection, choose the location on LinkedIn. Other RoleScout filters are not transferred, and LinkedIn results are viewed on LinkedIn rather than imported into the local index.
 
 ### Automatic refreshes (terminal 3)
 
@@ -466,3 +466,7 @@ clauses are checked independently; preferred experience is not a hard requiremen
 Title-derived levels remain labeled as inferred. Unknown requirements may still
 appear when Include unspecified requirements is selected. Existing older records
 are re-extracted before searching; reindexing preserves source verification dates.
+
+RoleScout is the app name. The existing project folder, environment variables,
+browser storage key, and macOS service identifiers retain their original names
+for compatibility with this installation.

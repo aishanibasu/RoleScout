@@ -1,4 +1,4 @@
-# Role Searcher development instructions
+# RoleScout development instructions
 
 - Think through the existing behavior, requirements, and impact before editing.
 - Keep commit messages short and crisp.

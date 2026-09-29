@@ -31,7 +31,7 @@ exceptiongroup==1.3.1 ; python_full_version < '3.11'
     #   anyio
     #   pytest
 fastapi==0.128.8
-    # via role-searcher
+    # via role-scout
 h11==0.16.0
     # via
     #   httpcore
@@ -39,7 +39,7 @@ h11==0.16.0
 httpcore==1.0.9
     # via httpx
 httpx==0.28.1
-    # via role-searcher
+    # via role-scout
 idna==3.20
     # via
     #   anyio
@@ -60,9 +60,9 @@ pygments==2.21.0
     # via pytest
 pytest==8.4.2
 python-dotenv==1.2.1 ; python_full_version < '3.10'
-    # via role-searcher
+    # via role-scout
 python-dotenv==1.2.3 ; python_full_version >= '3.10'
-    # via role-searcher
+    # via role-scout
 ruff==0.16.8
 starlette==0.49.3 ; python_full_version < '3.10'
     # via fastapi
@@ -89,4 +89,4 @@ typing-inspection==0.4.4 ; python_full_version >= '3.10'
     #   fastapi
     #   pydantic
 uvicorn==0.39.0
-    # via role-searcher
+    # via role-scout
