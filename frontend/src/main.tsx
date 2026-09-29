@@ -1,17 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './style.css';
-import { DeadlineFlag } from './DeadlineFlag';
+import { JobCard } from './JobCard';
+import type { Job } from './JobCard';
 import { Pagination } from './Pagination';
 import { RefreshStatus } from './RefreshStatus';
 import { SourceCoverage } from './SourceCoverage';
 import { LinkedInSearch } from './LinkedInSearch';
-import { EligibilityDetails, experienceLabel } from './EligibilityDetails';
 import { Tracker, writeTracking } from './Tracking';
 import type { TrackedJob } from './Tracking';
-import type { EligibilityFields } from './EligibilityDetails';
 
-type Job = EligibilityFields & { application_deadline: string | null; deadline_status: string; deadline_evidence: string | null; first_seen: string; status: string; source: string; details_pending?: boolean; description_note?: string; also_listed_on?: string[]; id: number; company: string; title: string; type: string; interest: string[]; studies: string[]; area: string; city: string; region: string; country: string; arrangement: string; level: string; graduation: number[]; description: string; url: string; locations: {city: string; region: string; country: string; raw: string}[]; last_verified: string; source_experience: string; evidence: Record<string, {status: string; text?: string}> };
 type Filters = Record<string, string[]>;
 const disciplines = ['Finance', 'Economics', 'Accounting', 'Business', 'Computer Science', 'Data Science', 'Information Technology', 'Architecture', 'Mathematics', 'Statistics', 'Engineering', 'Physics', 'Biology', 'Chemistry'];
 const unique = (values: string[]) => [...new Set(values.filter(Boolean))].sort();
@@ -71,7 +69,6 @@ function App() {
   const [query, setQuery] = useState(initial.query);
   const [strict, setStrict] = useState(initial.strict);
   const [sort, setSort] = useState(initial.sort);
-  const [expanded, setExpanded] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [view, setView] = useState('explore');
   const [tracked, setTracked] = useState<TrackedJob[]>([]);
@@ -153,7 +150,7 @@ function App() {
   }, [applied, sort, page]);
   function update(key: string, values: string[]) { setFilters(f => ({ ...f, [key]: values, ...(key === 'country' ? { region: [] } : {}) })); }
   function reset() { setNewOnly(false); setFilters(initialEmpty()); setQuery(''); setStrict(false); }
-  function applyFilters() { setApplied({ filters, query, strict, newOnly }); setPage(1); setExpanded(null); }
+  function applyFilters() { setApplied({ filters, query, strict, newOnly }); setPage(1); }
   const chosen = Object.entries(filters).flatMap(([k, vs]) => vs.map(v => ({ k, v })));
   const results = jobs;
   return <><header><a className="brand" href={location.pathname}><span className="brand-icon">r.</span>role searcher<span className="beta">EARLY PREVIEW</span></a><a className="header-link" href="#opportunities">Explore opportunities ↗</a></header>
@@ -176,7 +173,7 @@ function App() {
     <div className="results-heading"><div><h2>Find your next opportunity</h2><p role="status">{loading ? 'Loading jobs…' : `${total} matching roles`}</p></div><label className="sort">Sort by <select value={sort} onChange={e => { setPage(1); setSort(e.target.value); }}><option value="default">First seen: newest</option><option value="company">Company A–Z</option><option value="verified">Most recently verified</option></select></label></div>
     {!!chosen.length && <div className="chips" aria-label="Selected filters">{chosen.map(({ k, v }) => <button key={k + v} onClick={() => update(k, filters[k].filter(x => x !== v))} aria-label={`Remove ${labels[k]}: ${v}`}>{labels[k]}: {v} ×</button>)}</div>}
     {!loading && !error && total > 20 && <Pagination page={page} totalPages={Math.ceil(total / 20)} onChange={setPage} position="top"/>}
-    {!loading && !error && results.map(job => <article className="job" key={job.id}><div className="job-top"><div className="company-icon">{job.company.split(' ').slice(0, 2).map(s => s[0]).join('')}</div><div className="company">{job.company}<span>{job.source === 'hft' ? 'Via HFT Jobs · Aggregator' : 'Employer career listing'}</span></div><span className="job-type">{job.type}</span></div><h3>{job.title}</h3><DeadlineFlag job={job}/><div className="listing-freshness">First seen {new Date(job.first_seen).toLocaleDateString()} · Verified {new Date(job.last_verified).toLocaleDateString()}{Date.now() - Date.parse(job.last_verified) > 48 * 60 * 60 * 1000 && <strong> · Verification overdue</strong>}</div><div className="job-meta">{job.locations.map(l => [l.city, l.region, l.country].filter(Boolean).join(', ')).join(' · ') || 'Location not specified'} <span> / </span> {job.arrangement}</div><div className="tags"><span>{job.level}{job.evidence.level?.status === 'inferred' ? ' · inferred' : ''}</span>{job.experience_range && <span>{experienceLabel(job.experience_range)}</span>}{job.interest.map(i => <span key={i}>{i}</span>)}<span>{job.graduation.length ? `${job.graduation_window ? 'Graduation window overlaps' : 'Class of'} ${job.graduation.join(' / ')}` : 'Graduation not extracted'}</span></div><div className="job-bottom"><span>{job.studies.length ? job.studies.join(' · ') : 'Degree subjects not extracted'}</span><button disabled={saving !== null || tracked.some(item => item.id === job.id)} onClick={() => saveJob(job)}>{tracked.some(item => item.id === job.id) ? 'Saved ✓' : saving === job.id ? 'Saving…' : 'Save role'}</button><button aria-expanded={expanded === job.id} onClick={() => setExpanded(expanded === job.id ? null : job.id)}>View details {expanded === job.id ? '−' : '↗'}</button></div>{expanded === job.id && <div className="job-detail"><EligibilityDetails job={job}/><h4>Application deadline</h4><p>{job.deadline_evidence || "No unambiguous application closing date found. Check the original listing."}</p><p>Dates are shown as stated by the employer. Check the original application for its cutoff time and timezone; employers may close roles early.</p><h4>Original description</h4><p className="description">{job.description || (job.details_pending ? 'Full description is being retrieved. Check the original application for requirements.' : job.description_note || 'Full requirements are available on the original employer website.')}</p>{job.also_listed_on?.includes('hft') && <p>Also listed on HFT Jobs.</p>}<p><strong>Matching context:</strong> Finance describes the employer’s industry. Other interests and student level may be inferred from source categories or the title. Unspecified requirements are not confirmation of eligibility. Source experience category: {job.source_experience || 'Not specified'}. Last verified: {new Date(job.last_verified).toLocaleString()}.</p>{/^https?:\/\//i.test(job.url) ? <a href={job.url} target="_blank" rel="noreferrer">View original application ↗</a> : <p>Application link unavailable.</p>}</div>}</article>)}
+    {!loading && !error && results.map(job => <JobCard key={job.id} job={job} saved={tracked.some(item => item.id === job.id)} saving={saving === job.id} saveDisabled={saving !== null} onSave={() => saveJob(job)}/>)}
     {!loading && !error && !results.length && <div className="empty"><span>⌕</span><h3>No roles match these preferences.</h3><p>Try broadening your preferences. More employers will be added as source coverage expands.</p><button onClick={reset}>Clear filters and search</button></div>}
     {loading && <p role="status">Loading current listings…</p>}
     {error && <div className="empty" role="alert"><h3>Jobs are temporarily unavailable.</h3><p>{error}</p><button onClick={() => setReload(x => x + 1)}>Try again</button></div>}

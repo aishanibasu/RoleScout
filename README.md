@@ -453,3 +453,8 @@ results** to apply them together. Until submission, the existing results, page,
 and URL remain unchanged. Reset and removing selection chips also wait for
 submission. Page navigation and sorting use the last applied criteria. Browser
 back/forward restores the applied search and its controls.
+
+Result cards show company, role, a concise eligibility summary, location, deadline,
+and the application URL directly. Full source descriptions and the View details
+expander are omitted. Missing criteria remain Not specified; preferred and inferred
+criteria are labeled. Save role remains available on each card.

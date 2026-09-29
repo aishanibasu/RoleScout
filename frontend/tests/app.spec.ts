@@ -19,9 +19,9 @@ test('search, pagination, URL navigation, details and layout', async ({ page }, 
   await search.fill('Research Analyst 03');
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'View details' }).click();
-  await expect(page.getByRole('heading', { name: 'Original description' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'View original application' })).toHaveAttribute('href', 'https://example.com/jobs/3');
+  await expect(page.getByRole('button', { name: 'View details' })).toHaveCount(0);
+  await expect(page.locator('.job-facts')).toContainText('Mathematics');
+  await expect(page.getByRole('link', { name: /Open application for/ })).toHaveAttribute('href', 'https://example.com/jobs/3');
   await page.reload();
   await expect(search).toHaveValue('Research Analyst 03');
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
@@ -197,8 +197,7 @@ test('jump directly among numbered pages and keep history and filters', async ({
 test('NY includes other employers and Goldman uses its public link', async ({ page }) => {
   await page.goto('/?country=United+States&region=NY&q=Research+Analyst+05');
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'View details' }).click();
-  await expect(page.getByRole('link', { name: 'View original application' })).toHaveAttribute('href', 'https://higher.gs.com/roles/183697');
+  await expect(page.getByRole('link', { name: /Open application for/ })).toHaveAttribute('href', 'https://higher.gs.com/roles/183697');
   await page.getByRole('textbox', { name: 'Search roles, companies or skills' }).fill('Research Analyst 03');
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
@@ -220,8 +219,7 @@ test('deadline flags, filtering and URL persistence', async ({ page }, info) => 
   await expect(page.locator('.deadline-flag')).toContainText('Closing soon');
   await page.reload();
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'View details' }).click();
-  await expect(page.getByText('Applications close on', { exact: false }).first()).toBeVisible();
+  await expect(page.locator('.job-facts time')).toBeVisible();
   await page.locator('.job').scrollIntoViewIfNeeded();
   await page.screenshot({ path: `test-results/deadline-${info.project.name}.png` });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -296,4 +294,49 @@ test('paging and sorting use applied criteria while edits are pending', async ({
   await expect(page).not.toHaveURL(/q=/);
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+});
+
+test('concise cards show the requested fields and a direct application URL', async ({ page }, info) => {
+  await page.goto('/?q=Research+Analyst+03');
+  const card = page.locator('article.job');
+  await expect(card).toHaveCount(1);
+  await expect(card.locator('.company')).toContainText('Point72');
+  await expect(card.getByRole('heading', { name: 'Research Analyst 03' })).toBeVisible();
+  await expect(card.locator('dt')).toHaveText(['Eligibility', 'Location', 'Deadline']);
+  await expect(card.locator('.eligibility-summary')).toContainText('Mathematics (stated)');
+  await expect(card.locator('.eligibility-summary')).toContainText('Experience: Not specified');
+  await expect(card.locator('.job-facts')).toContainText('New York');
+  await expect(card.locator('.job-facts > div').last()).toContainText('Not specified');
+  const link = card.getByRole('link', { name: 'Open application for Research Analyst 03' });
+  await expect(link).toBeVisible();
+  await expect(link).toContainText('https://example.com/jobs/3');
+  await expect(link).toHaveAttribute('href', 'https://example.com/jobs/3');
+  await expect(link).toHaveAttribute('target', '_blank');
+  await expect(card.getByRole('button', { name: 'View details' })).toHaveCount(0);
+  await expect(card.locator('.description, .listing-freshness, .tags, .job-detail')).toHaveCount(0);
+  await expect(card).not.toContainText("Bachelor's degree in Mathematics required.");
+  await card.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `test-results/concise-card-${info.project.name}.png` });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('eligibility preserves preferred criteria and missing application URLs are safe', async ({ page }) => {
+  await page.route('**/api/jobs?**', async route => {
+    const response = await route.fetch();
+    const data = await response.json();
+    data.items = [{ ...data.items[0], url: 'javascript:alert(1)', locations: [],
+      education_requirements: [{ subjects: ['Economics'], preference: 'preferred', alternatives: true }],
+      experience_requirements: [{ minimum: 1, maximum: 3, preference: 'preferred' }],
+      graduation_window: { start: '2027-05-01', end: '2027-08-31' }, graduation_ambiguous: false,
+    }];
+    data.total = 1;
+    await route.fulfill({ response, json: data });
+  });
+  await page.goto('/');
+  const card = page.locator('article.job');
+  await expect(card.locator('.eligibility-summary')).toContainText('Economics (preferred; alternatives accepted)');
+  await expect(card.locator('.eligibility-summary')).toContainText('1–3 years stated (preferred)');
+  await expect(card.locator('.eligibility-summary')).toContainText('May 2027 – Aug 2027');
+  await expect(card.locator('.application-url')).toContainText('Unavailable');
+  await expect(card.getByRole('link')).toHaveCount(0);
 });
