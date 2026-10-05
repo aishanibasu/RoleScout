@@ -470,3 +470,35 @@ are re-extracted before searching; reindexing preserves source verification date
 RoleScout is the app name. The existing project folder, environment variables,
 browser storage key, and macOS service identifiers retain their original names
 for compatibility with this installation.
+
+### Start RoleScout with a double-click (macOS)
+
+After the initial dependency setup, double-click `Launch RoleScout.command` in
+Finder. It starts the API and frontend, waits for readiness, ensures the daily
+refresh worker is running, and opens http://localhost:5173 in your default browser.
+You can use that address in Chrome instead. Existing healthy servers are reused;
+occupied ports belonging to another app are reported without stopping that app.
+The services continue running when the launcher Terminal window closes. Startup
+logs are in `backend/data/logs/` (or beside your configured database).
+
+This Mac also has a `RoleScout.command` shortcut on the Desktop. The shortcut
+points to the launcher in the project; moving the project requires recreating it.
+The checked-in launcher works relative to its own location on other Macs.
+To check startup without opening a browser, run `.venv/bin/python -m app.launcher
+--no-browser` from `backend/`.
+
+The daily refresh worker runs separately from the web page. You do not need to
+open the app every day. Your Mac must be awake and online for imports; overdue
+sources are checked after wake/startup. The refresh schedule reports failed
+sources without pretending old data has been verified. Initial dependency setup
+still uses `uv sync` in backend and `pnpm install` in frontend; the launcher does
+not install packages or update dependencies automatically.
+
+Normal searches now exclude postings whose extracted deadline has passed, even
+between imports. The Deadline passed filter explicitly includes those postings
+for review. Saved applications and notes remain available. Unknown deadlines
+cannot establish that a posting is open; follow its application link to confirm.
+Matching recognizes spelled-out experience years and slash-separated specialties,
+and separates a required minimum from optional skills in a later sentence.
+Eligibility summaries distinguish stated matches from unknown or inferred criteria;
+this is a match to selected filters, not a guarantee of complete eligibility.

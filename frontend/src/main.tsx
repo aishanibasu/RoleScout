@@ -178,7 +178,7 @@ function App() {
     {loading && <p role="status">Loading current listings…</p>}
     {error && <div className="empty" role="alert"><h3>Jobs are temporarily unavailable.</h3><p>{error}</p><button onClick={() => setReload(x => x + 1)}>Try again</button></div>}
     {!loading && !error && total > 20 && <Pagination page={page} totalPages={Math.ceil(total / 20)} onChange={setPage} position="bottom"/>}
-    <p className="results-footer">A little direction for your next big step.</p></div></section></>}</main><footer><span>RoleScout</span><span>Built for possibility. · Live job search</span></footer></>;
+    <p className="results-footer">Passed application deadlines are hidden unless you select Deadline passed. Listings without a known deadline may still appear.</p></div></section></>}</main><footer><span>RoleScout</span><span>Built for possibility. · Live job search</span></footer></>;
 }
 function initialEmpty(): Filters { return Object.fromEntries(Object.keys(options).map(k => [k, []])); }
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);

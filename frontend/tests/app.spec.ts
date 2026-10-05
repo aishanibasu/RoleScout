@@ -12,7 +12,7 @@ test('search, pagination, URL navigation, details and layout', async ({ page }, 
   await expect(page).toHaveTitle('RoleScout — Find your next chapter');
   await expect(page.locator('header .brand')).toContainText('RoleScout');
   await expect(page.locator('footer')).toContainText('RoleScout');
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
   await page.screenshot({ path: `test-results/rolescout-${info.project.name}.png` });
   await page.getByRole('button', { name: 'Next →' }).first().click();
   await expect(page).toHaveURL(/page=2/);
@@ -61,19 +61,19 @@ test('new since visit, empty results and request failure recovery', async ({ pag
   await expect(page.getByText('No roles match these preferences.')).toBeVisible();
   await page.getByRole('button', { name: 'Clear filters and search' }).click();
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
   await page.route('**/api/jobs?**', route => route.fulfill({ status: 503, body: 'Unavailable' }));
   await page.getByRole('textbox', { name: 'Search roles, companies or skills' }).fill('Research');
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Jobs are temporarily unavailable.' })).toBeVisible();
   await page.unroute('**/api/jobs?**');
   await page.getByRole('button', { name: 'Try again', exact: true }).click();
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
 });
 
 test('filters work on desktop and mobile, with forward navigation and verified sorting', async ({ page }, info) => {
   await page.goto('/');
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
   const company = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: 'Company' }) });
   await company.locator('summary').click();
@@ -88,13 +88,13 @@ test('filters work on desktop and mobile, with forward navigation and verified s
   await page.getByLabel('Sort by').selectOption('verified');
   await page.reload();
   await expect(page.getByLabel('Sort by')).toHaveValue('verified');
-  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('238 matching roles', { exact: true })).toBeVisible();
 });
 
 
 test('areas of study include Mathematics and clears retired URL filters', async ({ page }, info) => {
   await page.goto('/?minor=Finance&area=Business+%26+Finance');
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
   await expect(page).not.toHaveURL(/minor=|area=/);
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
   await expect(page.locator('details.dropdown summary').filter({ hasText: /^Minor/ })).toHaveCount(0);
@@ -116,7 +116,7 @@ test('areas of study include Mathematics and clears retired URL filters', async 
   await page.screenshot({ path: `test-results/major-${info.project.name}.png`, fullPage: true });
   await major.getByRole('checkbox', { name: 'Economics', exact: true }).check();
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
-  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('238 matching roles', { exact: true })).toBeVisible();
 });
 
 
@@ -149,13 +149,13 @@ test('custom study areas can be added, matched, restored and removed', async ({ 
   await expect(page.getByText('No roles match these preferences.')).toBeVisible();
   await page.getByRole('button', { name: 'Remove Areas of study: Actuarial Science', exact: true }).click();
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
 });
 
 
 test('location filters use country and state only', async ({ page }, info) => {
   await page.goto('/?city=London');
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
   await expect(page).not.toHaveURL(/city=/);
   if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
   await expect(page.locator('details.dropdown summary').filter({ hasText: /^City/ })).toHaveCount(0);
@@ -167,7 +167,7 @@ test('location filters use country and state only', async ({ page }, info) => {
   await state.locator('summary').click();
   await state.getByRole('checkbox', { name: 'New York', exact: true }).check();
   await expect(page.getByRole('button', { name: 'Remove State: New York', exact: true })).toBeVisible();
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Search LinkedIn' })).toHaveAttribute('href', /location=New\+York%2C\+United\+States/);
   await page.screenshot({ path: `test-results/country-state-${info.project.name}.png`, fullPage: true });
   await country.getByRole('button', { name: 'Clear selection', exact: true }).click();
@@ -215,8 +215,8 @@ test('deadline flags, filtering and URL persistence', async ({ page }, info) => 
   await dropdown.locator('summary').click();
   await dropdown.getByRole('radio', { name: 'Has a deadline', exact: true }).check();
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
-  await expect(page.getByText('3 matching roles', { exact: true })).toBeVisible();
-  await expect(page.locator('.deadline-flag')).toHaveCount(3);
+  await expect(page.getByText('2 matching roles', { exact: true })).toBeVisible();
+  await expect(page.locator('.deadline-flag')).toHaveCount(2);
   await dropdown.getByRole('radio', { name: 'Closing within 7 days', exact: true }).check();
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
@@ -229,7 +229,7 @@ test('deadline flags, filtering and URL persistence', async ({ page }, info) => 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('button', { name: 'Remove Application deadline: Closing within 7 days' }).click();
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
   await page.goto('/?deadline=Deadline+passed');
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
   await expect(page.locator('.deadline-flag')).toContainText('Stated deadline passed');
@@ -256,7 +256,7 @@ test('filter edits wait for submission and preserve current results', async ({ p
   await page.waitForTimeout(600);
   expect(requests).toEqual([]);
   expect(page.url()).toBe(originalUrl);
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
   await expect(page.getByText('Page 4 of 12').first()).toBeVisible();
   await page.getByRole('button', { name: 'Show results', exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: `test-results/apply-filters-${info.project.name}.png` });
@@ -279,22 +279,22 @@ test('filter edits wait for submission and preserve current results', async ({ p
   expect(requests).toHaveLength(beforeReset);
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
-  await expect(page.getByText('240 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
 });
 
 test('paging and sorting use applied criteria while edits are pending', async ({ page }) => {
   await page.goto('/?company=Point72');
-  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('238 matching roles', { exact: true })).toBeVisible();
   const search = page.getByRole('textbox', { name: 'Search roles, companies or skills' });
   await search.fill('Research Analyst 03');
   await page.getByRole('button', { name: 'Page 4', exact: true }).first().click();
   await expect(page.getByText('Page 4 of 12').first()).toBeVisible();
-  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('238 matching roles', { exact: true })).toBeVisible();
   await expect(page).not.toHaveURL(/q=/);
   await expect(search).toHaveValue('Research Analyst 03');
   await page.getByLabel('Sort by').selectOption('company');
   await expect(page.getByText('Page 1 of 12').first()).toBeVisible();
-  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
+  await expect(page.getByText('238 matching roles', { exact: true })).toBeVisible();
   await expect(page).not.toHaveURL(/q=/);
   await page.getByRole('button', { name: 'Show results', exact: true }).click();
   await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
@@ -367,4 +367,19 @@ test('early-career filters exclude senior titles and conflicting required experi
   await expect(page.getByRole('heading', { name: 'Entry Level Analyst' })).toBeVisible();
   await page.locator('article.job').scrollIntoViewIfNeeded();
   await page.screenshot({ path: `test-results/early-career-${info.project.name}.png` });
+});
+
+test('opening and resetting exclude passed deadlines; uncertain matches are labeled', async ({ page }) => {
+  await page.goto('/?q=Research+Analyst+02');
+  await expect(page.getByText('No roles match these preferences.')).toBeVisible();
+  await page.goto('/?deadline=Deadline+passed&q=Research+Analyst+02');
+  await expect(page.getByText('1 matching roles', { exact: true })).toBeVisible();
+  await expect(page.locator('.deadline-flag')).toContainText('Stated deadline passed');
+  await page.getByRole('button', { name: 'Reset', exact: true }).click();
+  await page.getByRole('button', { name: 'Show results', exact: true }).click();
+  await expect(page.getByText('239 matching roles', { exact: true })).toBeVisible();
+  await page.goto('/?q=Research+Analyst+03&major=Mathematics&graduation=2027');
+  await expect(page.getByText('Some selected requirements are unknown or inferred.')).toBeVisible();
+  await page.goto('/?q=Research+Analyst+03&major=Mathematics');
+  await expect(page.getByText('Selected criteria match stated requirements.')).toBeVisible();
 });

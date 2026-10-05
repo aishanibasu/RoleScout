@@ -196,3 +196,15 @@ def match_explanation(job, filters):
                 }
             )
     return reasons
+
+
+def eligibility_status(job, filters):
+    criteria = {
+        key: filters.get(key, []) for key in ("major", "minor", "area", "graduation", "level")
+    }
+    reasons = match_explanation(job, criteria)
+    if not reasons:
+        return "not_assessed"
+    return (
+        "confirmed" if all(reason["status"] == "explicit" for reason in reasons) else "needs_review"
+    )

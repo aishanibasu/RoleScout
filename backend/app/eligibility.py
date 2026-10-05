@@ -4,7 +4,7 @@ import calendar
 import re
 from datetime import date
 
-VERSION = 2
+VERSION = 3
 SUBJECTS = {
     "Finance": (r"\bfinance\b", "Business & Finance"),
     "Economics": (r"\beconomics\b", "Business & Finance"),
@@ -39,9 +39,20 @@ WINDOW = re.compile(
     re.I,
 )
 YEARS = re.compile(
-    r"^(?:(?:a minimum(?: of)?|minimum(?: of)?|at least|minimum required experience[: ]*|candidates? (?:must|should) have|you (?:(?:must|should) )?have|must have|requires?)\s+)?(\d{1,2})(?:\s*[-–—]\s*(\d{1,2}))?\s*(?:\+|or more|plus)?\s+years?[’']?\s+(?:of\s+)?(?:(?:[\w-]+\s+){0,5}experience\b|(?:as|in)\s+)",
+    r"^(?:(?:a minimum(?: of)?|minimum(?: of)?|at least|minimum required experience[: ]*|candidates? (?:must|should) have|you (?:(?:must|should) )?have|must have|requires?)\s+)?(\d{1,2})(?:\s*(?:[-–—]|to)\s*(\d{1,2}))?\s*(?:\+|or more|plus)?\s+years?[’']?\s+(?:of\s+)?(?:(?:[\w/-]+\s+){0,5}experience\b|(?:as|in)\s+)",
     re.I,
 )
+
+
+NUMBER_WORDS = dict(
+    zip(
+        "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty".split(),
+        range(21),
+    )
+)
+
+
+NUMBER_WORD_PATTERN = re.compile(r"\b(?:" + "|".join(NUMBER_WORDS) + r")\b", re.I)
 
 
 def clean(value):
@@ -92,7 +103,8 @@ def extract(description):
                     }
                 )
         # Avoid corporate biographies by only accepting a requirement at the start of a line.
-        years = YEARS.search(text)
+        years_text = NUMBER_WORD_PATTERN.sub(lambda m: str(NUMBER_WORDS[m[0].lower()]), text)
+        years = YEARS.search(years_text)
         if years:
             minimum, maximum = int(years.group(1)), int(years.group(2)) if years.group(2) else None
             if maximum is not None and re.search(r"\d\s*\+\s+years?", years.group(0), re.I):
@@ -101,7 +113,7 @@ def extract(description):
                 experience_preferred = preferred_section or bool(
                     PREFERRED.search(
                         re.split(
-                            r";|,\s*(?:ideally|preferably)|\b(?:ideally|preferably)\s+(?:in|within)\b",
+                            r";|\.\s+|\s+\((?!prefer|desired|ideally)|,\s*(?:ideally|preferably)|\b(?:ideally|preferably)\s+(?:in|within)\b",
                             text,
                             maxsplit=1,
                             flags=re.I,

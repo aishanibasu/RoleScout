@@ -8,7 +8,7 @@ from . import db
 from .coverage import scope
 from .dedup import deduplicate
 from .scheduling import status as scheduler_status
-from .search import match_explanation, matches
+from .search import eligibility_status, match_explanation, matches
 from .tracking import router
 
 FILTER_KEYS = (
@@ -63,7 +63,8 @@ def create_app(path=None):
         found = [
             job
             for job in deduplicate(db.active_jobs(path))
-            if matches(job, filters, q, certainty == "confirmed")
+            if (job.get("deadline_status") != "passed" or "Deadline passed" in filters["deadline"])
+            and matches(job, filters, q, certainty == "confirmed")
         ]
         if since is not None:
             if since.tzinfo is None:
@@ -78,7 +79,11 @@ def create_app(path=None):
             )
         start = (page - 1) * page_size
         items = [
-            dict(job, match_reasons=match_explanation(job, filters))
+            dict(
+                job,
+                match_reasons=match_explanation(job, filters),
+                eligibility_match=eligibility_status(job, filters),
+            )
             for job in found[start : start + page_size]
         ]
         return {"items": items, "total": len(found), "page": page, "page_size": page_size}
