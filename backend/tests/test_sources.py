@@ -23,9 +23,9 @@ def test_workday_index_pagination_and_metadata():
         calls.append(body['offset'])
         if body['offset']==0:return response({'total':2,'jobPostings':[{'externalPath':'/job/one','title':'Analyst','locationsText':'3 Locations'}]})
         return response({'total':0,'jobPostings':[{'externalPath':'/job/two','title':'Intern','locationsText':'New York'}]})
-    jobs=workday.bofa.fetch_snapshot(fetch)
+    jobs=workday.rbc.fetch_snapshot(fetch)
     assert calls==[0,1]
-    assert jobs[0]['company']=='Bank of America' and jobs[0]['locations']==[]
+    assert jobs[0]['company']=='RBC' and jobs[0]['locations']==[]
     assert jobs[0]['details_pending'] and not jobs[0]['details_available']
     assert jobs[1]['type']=='Internship'
 
@@ -72,7 +72,7 @@ def test_hydration_failure_delays_retry(tmp_path,monkeypatch):
 def test_coverage_explains_unconnected_sources(tmp_path):
     with TestClient(create_app(tmp_path/'jobs.db')) as client:
         sources={s['id']:s for s in client.get('/sources').json()}
-        assert len(sources)==17
+        assert len(sources)==14
         assert 'experienced-hire' in sources['ubs']['scope']
         assert 'Campus' in sources['jefferies']['scope']
         assert sources['hudsonbay']['status']=='manual' and sources['hudsonbay']['job_count']==0

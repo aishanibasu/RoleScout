@@ -2,7 +2,7 @@
 
 ## Product plan
 
-Status: React frontend connected to a FastAPI/SQLite backend; 14 listing sources are connected with daily refresh schedules; all 17 requested sources have visible coverage status.
+Status: React frontend connected to a FastAPI/SQLite backend; 13 listing sources are connected with daily refresh schedules; 14 sources have visible coverage status, including Hudson Bay’s contact-based recruiting.
 Created: September 17, 2026.
 Project location: `/Users/aishanibasu/Projects/Role Searcher`.
 
@@ -64,7 +64,7 @@ Interactive API documentation: <http://127.0.0.1:8000/docs>.
 - `GET /jobs`: repeated dropdown query parameters (including `company=Point72` or `company=Ares%20Management`), `q`, `certainty=all|confirmed`, `sort=default|company|verified`, `page`, and `page_size` (maximum 100).
 - `GET /jobs/{id}`: full listing, source text, extraction evidence, and freshness.
 - `GET /filters`: available values and normalized locations.
-- `GET /sources`: all 17 requested sources, active counts, errors, and freshness status.
+- `GET /sources`: all 14 configured sources, active counts, errors, and freshness status.
 - `GET /runs`: recent collection results, including interrupted runs.
 - `GET /scheduler`: worker heartbeat, running state, and persisted source schedules.
 
@@ -78,12 +78,9 @@ Verified local imports on September 18, 2026; counts change with refresh.
 | [Ares Management](https://www.ares.com/us/careers) | 288 | Public career listings; requirements are extracted from available descriptions. |
 | [BNY](https://www.bny.com/corporate/global/en/about-us/careers/work-with-us.html) | 1,399 | Public BNY career index. Full descriptions populate in background; a few unavailable feed records may be excluded. |
 | [Balyasny Asset Management](https://www.bamfunds.com/careers) | 140 | Public Balyasny career listings, including internships. Full descriptions populate in background. |
-| [Bank of America](https://careers.bankofamerica.com/en-us) | 1991 | US experienced-hire portal; campus and other regional portals are separate. Descriptions populate in background. |
-| [Citadel](https://www.citadel.com/careers/) | — | The public careers portal returned an access challenge. |
 | [Goldman Sachs](https://www.goldmansachs.com/careers) | 1266 | Goldman Sachs public campus, early-career and professional role index; visit the employer for full requirements. |
 | [HFT Jobs](https://www.hft-jobs.com/jobs) | 23453 | Third-party aggregator metadata. Full requirements remain on the original employer website. |
 | [Hudson Bay Capital](https://www.hudsonbaycapital.com/careers) | — | The official careers page provides careers@hudsonbaycapital.com for inquiries; no public job listing feed was found. Open the careers page for details. |
-| [JPMorgan Chase](https://www.jpmorganchase.com/careers) | — | The linked Oracle portal returned HTTP 403 when checking collection access. |
 | [Jefferies](https://www.jefferies.com/careers/) | 58 | Campus opportunities only; the experienced-hire portal is not connected. |
 | [Morgan Stanley](https://www.morganstanley.com/people-opportunities) | 123 | Student and graduate programs; experienced-hire feed not returning listings. |
 | [Point72](https://careers.point72.com/) | 231 | Public career listings; requirements are extracted from available descriptions. |
@@ -94,11 +91,11 @@ Verified local imports on September 18, 2026; counts change with refresh.
 
 31,257 source records produce 30,910 search results after merging matching employer/HFT application URLs and retaining attribution. Different URLs for the same role may still appear separately. Aggregator metadata is labeled. Hudson Bay Capital is included as contact-based recruiting, with no public listing feed found.
 
-Refresh with `python -m app.collect SOURCE_ID`. IDs: `point72`, `ares`, `apollo`, `sig`, `twosigma`, `morganstanley`, `jefferies`, `bofa`, `rbc`, `gs`, `hft`, `ubs`, `bam`, and `bny`. The scheduler refreshes due sources; sources without adapters are not scheduled.
+Refresh with `python -m app.collect SOURCE_ID`. IDs: `point72`, `ares`, `apollo`, `sig`, `twosigma`, `morganstanley`, `jefferies`, `rbc`, `gs`, `hft`, `ubs`, `bam`, and `bny`. The scheduler refreshes due sources; sources without adapters are not scheduled.
 
 Collectors check robots directives, throttle requests, respect retry deadlines and reject incomplete, empty, duplicate or sharply reduced snapshots. Failed refreshes preserve previous listings. Two successful snapshots omitting a job mark it inactive. A failed refresh or data older than 48 hours is labeled stale.
 
-Bank descriptions populate in batches of 20 between scheduler cycles; initial completion may take hours. Manual batch: `python -m app.hydrate rbc --limit 20` (also `bofa`, `bny`, `ubs` or `bam`). Descriptions survive index refreshes, are rechecked after seven days, and preserve listing verification timestamps. Detail failures back off. Missing descriptions do not confirm education, graduation or experience requirements; review the employer listing.
+Bank descriptions populate in batches of 20 between scheduler cycles; initial completion may take hours. Manual batch: `python -m app.hydrate rbc --limit 20` (also `bny`, `ubs`, `bam` or `jefferies`). Descriptions survive index refreshes, are rechecked after seven days, and preserve listing verification timestamps. Detail failures back off. Missing descriptions do not confirm education, graduation or experience requirements; review the employer listing.
 
 The UI includes coverage status, dropdown filters, pagination, eligibility evidence, source links and URL-persisted selections. Newest means first discovered by this app. Browser back/forward navigation restores filters, search, sort, and pagination. Search loads the local index into memory; larger deployments should move filtering and deduplication into database queries.
 
@@ -256,7 +253,6 @@ The long-term aim is broad investment-bank coverage. “All investment banks” 
 | Ares Management | [Careers](https://www.ares.com/us/careers) | Active Workday collector; 288 listings verified in initial import |
 | Balyasny Asset Management | [Careers](https://www.bamfunds.com/careers) | Researching dynamic Salesforce job portal |
 | Point72 | [Careers](https://careers.point72.com/) | Active collector; live refresh verified |
-| Citadel | [Careers](https://www.citadel.com/careers/) | Direct collection blocked by access challenge |
 | Two Sigma | [Careers](https://www.twosigma.com/careers/) | Landing page accessible; listing integration pending |
 | Susquehanna / SIG | [Careers](https://sig.com/careers/) | Landing page accessible; listing integration pending |
 
@@ -268,9 +264,7 @@ Official career websites for every bank explicitly named in the request:
 
 | Bank | Official career website |
 | --- | --- |
-| JPMorgan Chase / J.P. Morgan (JP) | [JPMorganChase Careers](https://www.jpmorganchase.com/careers) |
 | Morgan Stanley | [Morgan Stanley Careers](https://www.morganstanley.com/people-opportunities) |
-| Bank of America / BofA Securities | [Bank of America Careers](https://careers.bankofamerica.com/en-us) |
 | BNY / Bank of New York Mellon (BoNY) | [BNY Careers](https://www.bny.com/corporate/global/en/about-us/careers/work-with-us.html) |
 | UBS | [UBS Careers](https://www.ubs.com/global/en/careers.html) |
 | RBC / RBC Capital Markets | [RBC Careers](https://jobs.rbc.com/) |
@@ -502,3 +496,5 @@ Matching recognizes spelled-out experience years and slash-separated specialties
 and separates a required minimum from optional skills in a later sentence.
 Eligibility summaries distinguish stated matches from unknown or inferred criteria;
 this is a match to selected filters, not a guarantee of complete eligibility.
+
+Bank of America, JPMorgan, and Citadel are no longer configured sources. Their direct-feed listings are excluded from search; previously saved applications are retained.

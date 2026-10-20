@@ -17,17 +17,14 @@ SOURCES = [
     ("apollo", "Apollo", "https://www.apollo.com/careers", "planned"),
     ("ares", "Ares Management", "https://www.ares.com/us/careers", "ready"),
     ("bam", "Balyasny Asset Management", "https://www.bamfunds.com/careers", "planned"),
-    ("citadel", "Citadel", "https://www.citadel.com/careers/", "planned"),
     ("twosigma", "Two Sigma", "https://www.twosigma.com/careers/", "planned"),
     ("sig", "Susquehanna", "https://sig.com/careers/", "planned"),
-    ("jpmorgan", "JPMorgan Chase", "https://www.jpmorganchase.com/careers", "planned"),
     (
         "morganstanley",
         "Morgan Stanley",
         "https://www.morganstanley.com/people-opportunities",
         "planned",
     ),
-    ("bofa", "Bank of America", "https://careers.bankofamerica.com/en-us", "planned"),
     (
         "bny",
         "BNY",
@@ -100,16 +97,11 @@ def initialize(path=None):
             SOURCES,
         )
         db.execute("UPDATE sources SET status='researching' WHERE id='bam' AND status='planned'")
-        db.execute(
-            "UPDATE sources SET status='blocked',error='Public collector received an access challenge; integration pending' WHERE id='citadel' AND status='planned'"
-        )
-        from .coverage import LIMITATIONS
-
-        for identifier, reason in LIMITATIONS.items():
-            db.execute(
-                "UPDATE sources SET status=?,error=? WHERE id=? AND last_success IS NULL",
-                ("researching" if identifier == "bam" else "blocked", reason, identifier),
-            )
+        # Keep saved applications and historical runs, but retire removed integrations.
+        for identifier in ("bofa", "jpmorgan", "citadel"):
+            db.execute("DELETE FROM refresh_schedule WHERE source_id=?", (identifier,))
+            db.execute("UPDATE sources SET status='retired',error=NULL WHERE id=?", (identifier,))
+            db.execute("UPDATE jobs SET status='inactive' WHERE source_id=?", (identifier,))
         db.executemany(
             "INSERT OR IGNORE INTO refresh_schedule(source_id) VALUES (?)",
             [
@@ -121,7 +113,6 @@ def initialize(path=None):
                     "sig",
                     "hft",
                     "morganstanley",
-                    "bofa",
                     "rbc",
                     "bny",
                     "twosigma",

@@ -34,7 +34,7 @@ def respect_retry_after(response):
     if response.status_code in (429, 503) and response.headers.get('Retry-After'):
         raise RetryLater(response.headers['Retry-After'])
 
-ADAPTERS = {'point72': point72, 'ares': ares, 'apollo': workday.apollo, 'sig': sig, 'hft':hft, 'morganstanley':morganstanley, 'bofa':workday.bofa, 'rbc':workday.rbc, 'bny':oracle.bny, 'twosigma':twosigma, 'jefferies':jefferies, 'gs':goldman, 'ubs':ubs, 'bam':bam}
+ADAPTERS = {'point72': point72, 'ares': ares, 'apollo': workday.apollo, 'sig': sig, 'hft':hft, 'morganstanley':morganstanley, 'rbc':workday.rbc, 'bny':oracle.bny, 'twosigma':twosigma, 'jefferies':jefferies, 'gs':goldman, 'ubs':ubs, 'bam':bam}
 
 def with_source(source_id, action):
     adapter = ADAPTERS[source_id]

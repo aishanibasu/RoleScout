@@ -410,3 +410,15 @@ test('unknown experience requires an explicit selection', async ({ page }) => {
   await page.goto('/?q=Research+Analyst+03&level=Entry+level&level=Not+specified');
   await expect(page.getByRole('heading', { name: 'Research Analyst 03' })).toBeVisible();
 });
+
+
+test('retired sources are absent from source coverage', async ({ page }) => {
+  await page.goto('/');
+  const coverage = page.locator('.source-coverage');
+  await coverage.locator('summary').click();
+  await expect(coverage.locator('.source-entry')).toHaveCount(14);
+  for (const name of ['Bank of America', 'JPMorgan Chase', 'Citadel']) {
+    await expect(coverage.getByRole('link', { name })).toHaveCount(0);
+  }
+  await expect(coverage.getByRole('link', { name: /RBC/ })).toBeVisible();
+});

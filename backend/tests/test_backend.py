@@ -102,5 +102,5 @@ def test_api_pagination_filters_detail_sources(database, listing):
         assert client.get('/jobs/99999').status_code == 404
         assert client.get('/jobs/' + str(result['items'][0]['id'])).status_code == 200
         assert 'United Kingdom' in client.get('/filters').json()['country']
-        assert len(client.get('/sources').json()) == 17
+        assert len(client.get('/sources').json()) == 14
         assert client.get('/runs').json()[0]['status'] == 'success'

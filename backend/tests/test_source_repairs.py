@@ -86,7 +86,7 @@ def test_workday_retries_entire_snapshot_after_duplicate_page():
             return response([row, dict(row, externalPath="/job/two")], 2)
         return response([row], 2)
 
-    jobs = workday.bofa.fetch_snapshot(request)
+    jobs = workday.rbc.fetch_snapshot(request)
     assert calls == [0, 1, 0]
     assert len(jobs) == 2
 
@@ -99,5 +99,5 @@ def test_workday_persistently_duplicate_pages_are_not_accepted():
         return response([{"externalPath": "/job/one", "title": "Analyst"}], 2)
 
     with pytest.raises(ValueError, match="Duplicate"):
-        workday.bofa.fetch_snapshot(request)
+        workday.rbc.fetch_snapshot(request)
     assert calls == [0, 1, 0, 1]

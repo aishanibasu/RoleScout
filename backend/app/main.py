@@ -127,7 +127,7 @@ def create_app(path=None):
             result = [
                 dict(r)
                 for r in conn.execute("""SELECT s.*, (SELECT count(*) FROM jobs j
-                WHERE j.source_id=s.id AND j.status='active') AS job_count FROM sources s ORDER BY s.name""")
+                WHERE j.source_id=s.id AND j.status='active') AS job_count FROM sources s WHERE s.status != 'retired' ORDER BY s.name""")
             ]
         cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
         for source in result:

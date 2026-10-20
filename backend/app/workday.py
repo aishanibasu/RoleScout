@@ -100,7 +100,5 @@ class WorkdayIndex(Workday):
         return details
 
 
-bofa = WorkdayIndex("Bank of America", "ghr.wd1.myworkdayjobs.com", "ghr", "Lateral-US")
-bofa.SCOPE = "US experienced-hire portal; campus and other regional portals are separate."
 rbc = WorkdayIndex("RBC", "rbc.wd3.myworkdayjobs.com", "rbc", "RBCGLOBAL1")
 rbc.SCOPE = "Public RBC global Workday board. Records without a title or application link are excluded; descriptions load separately."
