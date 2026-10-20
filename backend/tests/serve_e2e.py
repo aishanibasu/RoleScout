@@ -34,6 +34,14 @@ def main():
             )
             for i in range(240)
         ]
+        jobs[6]["locations"] = [
+            {
+                "city": "London",
+                "region": "England",
+                "country": "United Kingdom, United States",
+                "raw": "London, New York",
+            }
+        ]
         jobs[10]["title"] = "Managing Director, Investments"
         jobs[10]["description"] += "\n15+ years of experience in investments."
         jobs[11]["title"] = "Entry Level Analyst"

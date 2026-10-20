@@ -1,5 +1,9 @@
 """Canonical US state names shared by current and previously collected listings."""
 
+import re
+
+from .normalization import CITY_MAP
+
 STATE_NAMES = dict(
     pair.split(":", 1)
     for pair in (
@@ -36,6 +40,29 @@ def state_name(value, country):
     return STATE_NAMES.get(value.upper(), _STATE_BY_NAME.get(value.casefold(), value))
 
 
+def expand_location(loc):
+    countries = [
+        country_name(part) for part in re.split(r"[,/|;]", loc.get("country", "")) if part.strip()
+    ]
+    known = {value[2] for value in CITY_MAP.values()}
+    if len(countries) < 2 or not all(country in known for country in countries):
+        return [loc]
+    # Resolve known cities individually; never attach every state to every country.
+    result = []
+    for part in re.split(r"[,/|;]", loc.get("raw", "")):
+        mapped = CITY_MAP.get(part.strip().casefold())
+        if mapped and mapped[2] in countries:
+            city, region, country = mapped
+            result.append(dict(loc, city=city, region=region, country=country))
+    represented = {item["country"] for item in result}
+    result.extend(
+        dict(loc, city="", region="", country=country)
+        for country in dict.fromkeys(countries)
+        if country not in represented
+    )
+    return result
+
+
 def normalize_locations(item):
     locations = [
         dict(
@@ -43,7 +70,8 @@ def normalize_locations(item):
             country=country_name(loc.get("country")),
             region=state_name(loc.get("region"), loc.get("country")),
         )
-        for loc in item.get("locations", [])
+        for original in item.get("locations", [])
+        for loc in expand_location(original)
     ]
     if not locations:
         return item

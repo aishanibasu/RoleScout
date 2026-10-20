@@ -120,3 +120,74 @@ def test_multilocation_state_does_not_cross_country_boundaries():
         locs=[{"country": "United States", "region": "NJ"}, {"country": "Canada", "region": "NY"}],
     )
     assert not matches(item, {"country": ["United States"], "region": ["NY"]})
+
+
+def test_multi_country_locations_do_not_cross_state_boundaries():
+    original = job(
+        "UBS",
+        "multi",
+        "Analyst",
+        "https://example.com/multi",
+        locs=[
+            {
+                "city": "London",
+                "region": "England",
+                "country": "United Kingdom, United States",
+                "raw": "London, New York",
+            }
+        ],
+    )
+    item = normalize_locations(original)
+    assert [(loc["city"], loc["country"]) for loc in item["locations"]] == [
+        ("London", "United Kingdom"),
+        ("New York City", "United States"),
+    ]
+    assert matches(item, {"country": ["United States"], "region": ["NY"]})
+    assert matches(item, {"country": ["United Kingdom"], "region": ["England"]})
+    assert not matches(item, {"country": ["United Kingdom"], "region": ["NY"]})
+    assert normalize_locations(item) == item
+    assert original["locations"][0]["country"] == "United Kingdom, United States"
+
+
+def test_multi_country_unknown_city_does_not_invent_geography():
+    item = normalize_locations(
+        {
+            "locations": [
+                {
+                    "city": "Unknown",
+                    "region": "England",
+                    "country": "United States/United Kingdom",
+                    "raw": "Unknown",
+                }
+            ]
+        }
+    )
+    assert {loc["country"] for loc in item["locations"]} == {"United States", "United Kingdom"}
+    assert all(not loc["city"] and not loc["region"] for loc in item["locations"])
+
+
+def test_api_repairs_existing_combined_countries(tmp_path):
+    path = tmp_path / "jobs.db"
+    collect(
+        path,
+        lambda: [
+            job(
+                "UBS",
+                "multi",
+                "Analyst",
+                "https://example.com/multi",
+                locs=[
+                    {
+                        "city": "London",
+                        "region": "England",
+                        "country": "United Kingdom, United States",
+                        "raw": "London, New York",
+                    }
+                ],
+            )
+        ],
+    )
+    with TestClient(create_app(path)) as client:
+        assert client.get("/filters").json()["country"] == ["United Kingdom", "United States"]
+        assert client.get("/jobs?country=United+States&region=NY").json()["total"] == 1
+        assert client.get("/jobs?country=United+Kingdom&region=NY").json()["total"] == 0

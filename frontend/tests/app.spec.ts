@@ -422,3 +422,18 @@ test('retired sources are absent from source coverage', async ({ page }) => {
   }
   await expect(coverage.getByRole('link', { name: /RBC/ })).toBeVisible();
 });
+
+
+test('multi-country roles match each country separately', async ({ page }, info) => {
+  await page.goto('/?q=Research+Analyst+06&country=United+States&region=NY');
+  await expect(page.getByRole('heading', { name: 'Research Analyst 06' })).toBeVisible();
+  await expect(page.locator('.job-facts')).toContainText('London, England, United Kingdom');
+  await expect(page.locator('.job-facts')).toContainText('New York City, New York, United States');
+  await page.goto('/?q=Research+Analyst+06&country=United+Kingdom');
+  await expect(page.getByRole('heading', { name: 'Research Analyst 06' })).toBeVisible();
+  if (info.project.name === 'mobile') await page.getByRole('button', { name: 'Customize filters' }).click();
+  const country = page.locator('details.dropdown').filter({ has: page.locator('summary', { hasText: /^Country/ }) });
+  await country.locator('summary').click();
+  await expect(country.getByText('United Kingdom, United States', { exact: true })).toHaveCount(0);
+  await page.screenshot({ path: `test-results/country-options-${info.project.name}.png` });
+});
