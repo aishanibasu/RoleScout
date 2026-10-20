@@ -2,7 +2,7 @@
 
 ## Product plan
 
-Status: React frontend connected to a FastAPI/SQLite backend; 13 listing sources are connected with daily refresh schedules; 14 sources have visible coverage status, including Hudson Bay’s contact-based recruiting.
+Status: React frontend connected to a FastAPI/SQLite backend; 13 listing sources are connected with daily refresh schedules; all 13 sources have visible coverage status.
 Created: September 17, 2026.
 Project location: `/Users/aishanibasu/Projects/Role Searcher`.
 
@@ -64,7 +64,7 @@ Interactive API documentation: <http://127.0.0.1:8000/docs>.
 - `GET /jobs`: repeated dropdown query parameters (including `company=Point72` or `company=Ares%20Management`), `q`, `certainty=all|confirmed`, `sort=default|company|verified`, `page`, and `page_size` (maximum 100).
 - `GET /jobs/{id}`: full listing, source text, extraction evidence, and freshness.
 - `GET /filters`: available values and normalized locations.
-- `GET /sources`: all 14 configured sources, active counts, errors, and freshness status.
+- `GET /sources`: all 13 configured sources, active counts, errors, and freshness status.
 - `GET /runs`: recent collection results, including interrupted runs.
 - `GET /scheduler`: worker heartbeat, running state, and persisted source schedules.
 
@@ -80,7 +80,6 @@ Verified local imports on September 18, 2026; counts change with refresh.
 | [Balyasny Asset Management](https://www.bamfunds.com/careers) | 140 | Public Balyasny career listings, including internships. Full descriptions populate in background. |
 | [Goldman Sachs](https://www.goldmansachs.com/careers) | 1266 | Goldman Sachs public campus, early-career and professional role index; visit the employer for full requirements. |
 | [HFT Jobs](https://www.hft-jobs.com/jobs) | 23453 | Third-party aggregator metadata. Full requirements remain on the original employer website. |
-| [Hudson Bay Capital](https://www.hudsonbaycapital.com/careers) | — | The official careers page provides careers@hudsonbaycapital.com for inquiries; no public job listing feed was found. Open the careers page for details. |
 | [Jefferies](https://www.jefferies.com/careers/) | 58 | Campus opportunities only; the experienced-hire portal is not connected. |
 | [Morgan Stanley](https://www.morganstanley.com/people-opportunities) | 123 | Student and graduate programs; experienced-hire feed not returning listings. |
 | [Point72](https://careers.point72.com/) | 231 | Public career listings; requirements are extracted from available descriptions. |
@@ -89,7 +88,7 @@ Verified local imports on September 18, 2026; counts change with refresh.
 | [Two Sigma](https://www.twosigma.com/careers/) | 55 | Public Two Sigma open roles, including early careers. |
 | [UBS](https://www.ubs.com/global/en/careers.html) | 541 | Public UBS experienced-hire board (site 5012); other campus boards are separate. Full descriptions populate in background. |
 
-31,257 source records produce 30,910 search results after merging matching employer/HFT application URLs and retaining attribution. Different URLs for the same role may still appear separately. Aggregator metadata is labeled. Hudson Bay Capital is included as contact-based recruiting, with no public listing feed found.
+31,257 source records produce 30,910 search results after merging matching employer/HFT application URLs and retaining attribution. Different URLs for the same role may still appear separately. Aggregator metadata is labeled.
 
 Refresh with `python -m app.collect SOURCE_ID`. IDs: `point72`, `ares`, `apollo`, `sig`, `twosigma`, `morganstanley`, `jefferies`, `rbc`, `gs`, `hft`, `ubs`, `bam`, and `bny`. The scheduler refreshes due sources; sources without adapters are not scheduled.
 
@@ -497,4 +496,4 @@ and separates a required minimum from optional skills in a later sentence.
 Eligibility summaries distinguish stated matches from unknown or inferred criteria;
 this is a match to selected filters, not a guarantee of complete eligibility.
 
-Bank of America, JPMorgan, and Citadel are no longer configured sources. Their direct-feed listings are excluded from search; previously saved applications are retained.
+Bank of America, JPMorgan, Citadel, and Hudson Bay Capital are no longer configured sources. Their direct-feed listings are excluded from search; previously saved applications are retained.

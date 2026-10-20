@@ -11,7 +11,7 @@ from app.main import create_app
 def test_retired_sources_removed_from_existing_installations(tmp_path):
     path = tmp_path / "roles.db"
     db.initialize(path)
-    retired = {"bofa", "jpmorgan", "citadel"}
+    retired = {"bofa", "jpmorgan", "citadel", "hudsonbay"}
     with db.connect(path) as conn:
         for source in retired:
             conn.execute(
@@ -30,13 +30,13 @@ def test_retired_sources_removed_from_existing_installations(tmp_path):
             )
     with TestClient(create_app(path)) as client:
         assert not retired.intersection(s["id"] for s in client.get("/sources").json())
-        assert len(client.get("/sources").json()) == 14
+        assert len(client.get("/sources").json()) == 13
         assert not retired.intersection(
             s["source"] for s in client.get("/scheduler").json()["sources"]
         )
         assert client.get("/jobs").json()["total"] == 0
         saved = client.get("/tracked").json()
-        assert len(saved) == 3
+        assert len(saved) == 4
         assert all(j["tracking"]["notes"] == "Keep my notes" for j in saved)
     db.initialize(path)  # Migration is safe to repeat.
     assert not retired.intersection(ADAPTERS)

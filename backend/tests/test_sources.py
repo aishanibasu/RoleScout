@@ -72,7 +72,7 @@ def test_hydration_failure_delays_retry(tmp_path,monkeypatch):
 def test_coverage_explains_unconnected_sources(tmp_path):
     with TestClient(create_app(tmp_path/'jobs.db')) as client:
         sources={s['id']:s for s in client.get('/sources').json()}
-        assert len(sources)==14
+        assert len(sources)==13
         assert 'experienced-hire' in sources['ubs']['scope']
         assert 'Campus' in sources['jefferies']['scope']
-        assert sources['hudsonbay']['status']=='manual' and sources['hudsonbay']['job_count']==0
+        assert 'hudsonbay' not in sources

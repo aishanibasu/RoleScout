@@ -11,7 +11,6 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 DEFAULT_DB = Path(__file__).resolve().parents[1] / "data" / "roles.sqlite3"
 SOURCES = [
-    ("hudsonbay", "Hudson Bay Capital", "https://www.hudsonbaycapital.com/careers", "manual"),
     ("point72", "Point72", "https://careers.point72.com/", "ready"),
     ("hft", "HFT Jobs", "https://www.hft-jobs.com/jobs", "planned"),
     ("apollo", "Apollo", "https://www.apollo.com/careers", "planned"),
@@ -98,7 +97,7 @@ def initialize(path=None):
         )
         db.execute("UPDATE sources SET status='researching' WHERE id='bam' AND status='planned'")
         # Keep saved applications and historical runs, but retire removed integrations.
-        for identifier in ("bofa", "jpmorgan", "citadel"):
+        for identifier in ("bofa", "jpmorgan", "citadel", "hudsonbay"):
             db.execute("DELETE FROM refresh_schedule WHERE source_id=?", (identifier,))
             db.execute("UPDATE sources SET status='retired',error=NULL WHERE id=?", (identifier,))
             db.execute("UPDATE jobs SET status='inactive' WHERE source_id=?", (identifier,))
