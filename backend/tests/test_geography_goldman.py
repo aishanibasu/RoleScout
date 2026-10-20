@@ -44,6 +44,7 @@ def test_legacy_goldman_links_and_saved_jobs_corrected_without_freshness_changes
         "183697_GS_MID_CAREER",
         "Analyst",
         "https://higher.gs.com/roles/183697_GS_MID_CAREER",
+        level="Entry level",
         locs=[{"city": "New York", "region": "NY", "country": "United States"}],
     )
     other = job(
@@ -51,6 +52,7 @@ def test_legacy_goldman_links_and_saved_jobs_corrected_without_freshness_changes
         "other",
         "Analyst",
         "https://example.com/jobs/other",
+        level="Entry level",
         locs=[{"city": "New York", "region": "New York", "country": "United States"}],
     )
     collect(path, lambda: [gs], source_id="gs")

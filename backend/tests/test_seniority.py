@@ -72,8 +72,12 @@ def test_required_experience_overrides_incorrect_entry_label(description):
         "",
     ],
 )
-def test_preferences_and_unknowns_not_hard_exclusions(description):
-    assert matches(role(description=description), EARLY)
+def test_unknown_levels_require_opt_in(description):
+    item = role(description=description)
+    assert matches(item, EARLY) == (
+        description in {"0-2 years of experience.", "No experience required."}
+    )
+    assert matches(item, {"level": ["Entry level", "Not specified"]})
 
 
 @pytest.mark.parametrize(
@@ -81,7 +85,9 @@ def test_preferences_and_unknowns_not_hard_exclusions(description):
     ["Executive Assistant to Managing Director", "Product Manager Intern", "Research Analyst"],
 )
 def test_support_and_intern_titles_not_executive_roles(title):
-    assert matches(role(title), EARLY)
+    item = role(title)
+    assert not matches(item, EARLY)
+    assert item["level"] == ("Student" if "Intern" in title else "Not specified")
 
 
 def test_explicit_label_preserved_and_broad_selection_allowed():
@@ -110,3 +116,31 @@ def test_legacy_records_corrected_in_api_without_mutating_dates(tmp_path):
         assert item["experience_requirements"][0]["minimum"] == 15
         assert item["last_verified"] == row["last_seen"]
         assert item["first_seen"] == row["first_seen"]
+
+
+@pytest.mark.parametrize(
+    "title,level",
+    [
+        ("Graduate Talent Program – Global Markets", "New graduate"),
+        ("Entry-Level Analyst", "Entry level"),
+        ("Junior Developer", "Entry level"),
+        ("Summer Analyst 2027", "Student"),
+        ("Graduate Research Internship", "Student"),
+    ],
+)
+def test_positive_title_signals(title, level):
+    item = role(title)
+    assert item["level"] == level
+    assert matches(item, {"level": [level]})
+    assert not matches(item, {"level": ["Senior"]})
+
+
+def test_new_graduate_does_not_match_required_work_experience():
+    assert not matches(
+        role("Graduate Talent Program", "2 years of experience required."),
+        {"level": ["New graduate"]},
+    )
+
+
+def test_entry_title_cannot_override_required_seniority():
+    assert not matches(role("Entry Level Analyst", "8 years of experience required."), EARLY)

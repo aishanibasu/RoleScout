@@ -4,7 +4,7 @@ import calendar
 import re
 from datetime import date
 
-VERSION = 3
+VERSION = 5
 SUBJECTS = {
     "Finance": (r"\bfinance\b", "Business & Finance"),
     "Economics": (r"\beconomics\b", "Business & Finance"),
@@ -62,6 +62,14 @@ def clean(value):
 def extract(description):
     education, experience, windows, classes = [], [], [], []
     preferred_section = False
+    # Some feeds flatten headings and requirements into a single paragraph.
+    description = re.sub(
+        r"\b((?:required|preferred|minimum) qualifications|requirements|qualifications)\s*:\s*",
+        r"\n\1\n",
+        description,
+        flags=re.I,
+    )
+    description = re.sub(r"(?<=[.;!?])\s+(?=[A-Z0-9])", "\n", description)
     for original in description.splitlines():
         text = clean(original)
         if not text:
@@ -105,6 +113,13 @@ def extract(description):
         # Avoid corporate biographies by only accepting a requirement at the start of a line.
         years_text = NUMBER_WORD_PATTERN.sub(lambda m: str(NUMBER_WORDS[m[0].lower()]), text)
         years = YEARS.search(years_text)
+        if not years:
+            # Explicit requirement language can follow a degree or introduction.
+            cue = re.search(
+                r"\b(?:at least|a minimum of|must have|you have|requires?)\s+\d", years_text, re.I
+            )
+            if cue:
+                years = YEARS.search(years_text[cue.start() :])
         if years:
             minimum, maximum = int(years.group(1)), int(years.group(2)) if years.group(2) else None
             if maximum is not None and re.search(r"\d\s*\+\s+years?", years.group(0), re.I):
@@ -201,7 +216,13 @@ def enrich(job):
         "text": "\n".join(e["text"] for e in extracted["experience_requirements"]),
     }
     # Recompute only levels previously created by this extractor; preserve source adapter labels.
-    if evidence.get("level", {}).get("rule") == "experience_range":
+    if evidence.get("level", {}).get("rule") in {
+        "experience_range",
+        "senior_title",
+        "title_level",
+        "no_experience",
+        "required_experience",
+    }:
         result["level"] = "Not specified"
         evidence["level"] = {"status": "unknown"}
     if result.get("level", "Not specified") == "Not specified" and experience:
@@ -216,6 +237,19 @@ def enrich(job):
                 "status": "inferred",
                 "text": experience["text"],
                 "rule": "experience_range",
+            }
+    if result.get("level", "Not specified") == "Not specified":
+        no_experience = re.search(
+            r"\bno (?:prior |previous |professional |work )?experience (?:is )?(?:required|necessary)\b",
+            job["description"],
+            re.I,
+        )
+        if no_experience:
+            result["level"] = "Entry level"
+            evidence["level"] = {
+                "status": "explicit",
+                "text": no_experience.group(),
+                "rule": "no_experience",
             }
     result["evidence"] = evidence
     result["extraction_version"] = VERSION

@@ -49,3 +49,17 @@ def with_deadline(job, today=None):
             else "upcoming"
         ),
     )
+
+
+def past_recruiting_program(job, today=None):
+    """A past intake year in a campus title is not a graduation requirement."""
+    today = today or datetime.now(timezone.utc).date()
+    title = job.get("title", "")
+    if not re.search(
+        r"\b(?:intern(?:ship)?|graduate|graduates|summer|campus|apprentice|trainee|junior)\b",
+        title,
+        re.I,
+    ):
+        return False
+    years = [int(y) for y in re.findall(r"\b20\d{2}\b", title)]
+    return bool(years) and max(years) < today.year

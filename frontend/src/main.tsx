@@ -165,7 +165,7 @@ function App() {
       if (k === 'country') values = unique(locations.map(j => j.country));
       if (k === 'region') values = unique(locations.filter(j => !filters.country.length || filters.country.includes(j.country)).map(j => j.region));
       return <Dropdown key={k} name={k} values={values} selected={filters[k]} onChange={v => update(k, v)}/>;
-    })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Choose one or more areas of study, or add your own. A role can match any selected subject. Unspecified requirements are included by default; confirmed matches require stated criteria. Review the original listing for full eligibility.</p></div></aside>
+    })}<label className="certainty">Match certainty<select value={strict ? 'confirmed' : 'all'} onChange={e => { setStrict(e.target.value === 'confirmed'); }}><option value="all">Include unspecified requirements</option><option value="confirmed">Confirmed matches only</option></select></label><p className="filter-help">Choose one or more areas of study, or add your own. A role can match any selected subject. Experience filters require a known level; select “Not specified” to also include unknown levels. Other unspecified requirements are included by default; confirmed matches require stated criteria. Review the original listing for full eligibility.</p></div></aside>
     <div className="results"><label className="search"><span aria-hidden="true">⌕</span><input aria-label="Search roles, companies or skills" placeholder="Search roles, companies or skills" value={query} onChange={e => { setQuery(e.target.value); }}/><span className="search-hint">EXPLORE</span></label>
     <div className="apply-filters"><button onClick={applyFilters}>Show results</button><span role="status">{pending ? 'Filters changed. Click Show results to apply them.' : 'Choose your filters, then click Show results.'}</span></div>
     <LinkedInSearch query={query} filters={filters} locations={locations}/>
@@ -178,7 +178,7 @@ function App() {
     {loading && <p role="status">Loading current listings…</p>}
     {error && <div className="empty" role="alert"><h3>Jobs are temporarily unavailable.</h3><p>{error}</p><button onClick={() => setReload(x => x + 1)}>Try again</button></div>}
     {!loading && !error && total > 20 && <Pagination page={page} totalPages={Math.ceil(total / 20)} onChange={setPage} position="bottom"/>}
-    <p className="results-footer">Passed application deadlines are hidden unless you select Deadline passed. Listings without a known deadline may still appear.</p></div></section></>}</main><footer><span>RoleScout</span><span>Built for possibility. · Live job search</span></footer></>;
+    <p className="results-footer">Missing listings, past-year recruiting programs, and listings unchecked for over 48 hours are hidden. Passed deadlines are hidden unless you select Deadline passed. An unknown deadline does not confirm a role is still open.</p></div></section></>}</main><footer><span>RoleScout</span><span>Built for possibility. · Live job search</span></footer></>;
 }
 function initialEmpty(): Filters { return Object.fromEntries(Object.keys(options).map(k => [k, []])); }
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);

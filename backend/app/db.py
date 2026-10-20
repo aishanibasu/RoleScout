@@ -2,7 +2,7 @@ import json
 import os
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -159,4 +159,10 @@ def serialize(row):
 
 def active_jobs(path=None):
     with connect(path) as db:
-        return [serialize(r) for r in db.execute("SELECT * FROM jobs WHERE status='active'")]
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=48)).isoformat()
+        return [
+            serialize(r)
+            for r in db.execute(
+                "SELECT * FROM jobs WHERE status='active' AND misses=0 AND last_seen>=?", (cutoff,)
+            )
+        ]

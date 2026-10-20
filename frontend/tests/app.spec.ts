@@ -383,3 +383,30 @@ test('opening and resetting exclude passed deadlines; uncertain matches are labe
   await page.goto('/?q=Research+Analyst+03&major=Mathematics');
   await expect(page.getByText('Selected criteria match stated requirements.')).toBeVisible();
 });
+
+
+test('opened links show Viewed across reloads without marking other jobs', async ({ page }, info) => {
+  await page.route('https://example.com/**', route => route.fulfill({ body: 'Job description' }));
+  await page.goto('/?q=Research+Analyst+03');
+  const card = page.locator('article.job');
+  await expect(card.locator('.viewed-badge')).toHaveCount(0);
+  const popupPromise = page.waitForEvent('popup');
+  await card.getByRole('link', { name: 'Open application for Research Analyst 03' }).click();
+  const popup = await popupPromise;
+  await popup.close();
+  await expect(card.locator('.viewed-badge')).toHaveText('Viewed ✓');
+  await page.reload();
+  await expect(card.locator('.viewed-badge')).toHaveText('Viewed ✓');
+  await card.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `test-results/viewed-${info.project.name}.png` });
+  await page.goto('/?q=Research+Analyst+04');
+  await expect(page.locator('article.job')).toHaveCount(1);
+  await expect(page.locator('.viewed-badge')).toHaveCount(0);
+});
+
+test('unknown experience requires an explicit selection', async ({ page }) => {
+  await page.goto('/?q=Research+Analyst+03&level=Entry+level');
+  await expect(page.getByText('No roles match these preferences.')).toBeVisible();
+  await page.goto('/?q=Research+Analyst+03&level=Entry+level&level=Not+specified');
+  await expect(page.getByRole('heading', { name: 'Research Analyst 03' })).toBeVisible();
+});

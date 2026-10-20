@@ -8,7 +8,7 @@ from app.search import matches, match_explanation
 
 
 def job(description):
-    return enrich({'title': '2028 Internship', 'company': 'Example', 'description': description,
+    return enrich({'title': 'Analyst', 'company': 'Example', 'description': description,
                    'external_id': 'EXAMPLE', 'type': 'Internship', 'level': 'Not specified', 'evidence': {}})
 
 

@@ -31,7 +31,7 @@ def matches(job, filters, query="", confirmed=False):
         actual = job.get(field, "Not specified")
         evidence = job.get("evidence", {}).get(field, {}).get("status", "unknown")
         if actual == "Not specified":
-            if confirmed and "Not specified" not in wanted:
+            if (confirmed or field == "level") and "Not specified" not in wanted:
                 return False
         elif actual not in wanted:
             return False

@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException, Query, Request
 
 from . import db
 from .coverage import scope
+from .deadlines import past_recruiting_program
 from .dedup import deduplicate
 from .scheduling import status as scheduler_status
 from .search import eligibility_status, match_explanation, matches
@@ -64,6 +65,7 @@ def create_app(path=None):
             job
             for job in deduplicate(db.active_jobs(path))
             if (job.get("deadline_status") != "passed" or "Deadline passed" in filters["deadline"])
+            and not past_recruiting_program(job)
             and matches(job, filters, q, certainty == "confirmed")
         ]
         if since is not None:

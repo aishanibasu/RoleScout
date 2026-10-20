@@ -65,7 +65,7 @@ def test_upsert_and_two_complete_refresh_closure(database, listing):
     assert len(db.active_jobs(database)) == 2
     assert db.active_jobs(database)[0]['first_seen'] == first['first_seen']
     collect(database, lambda: [other])
-    assert len(db.active_jobs(database)) == 2
+    assert len(db.active_jobs(database)) == 1  # Hide immediately; retain until closure confirmed.
     collect(database, lambda: [other])
     assert len(db.active_jobs(database)) == 1
     collect(database, lambda: [listing, other])

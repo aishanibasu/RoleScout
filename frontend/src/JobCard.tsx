@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { DeadlineFlag } from './DeadlineFlag';
 import { experienceLabel } from './EligibilityDetails';
 import type { EligibilityFields } from './EligibilityDetails';
@@ -25,6 +26,16 @@ function EligibilitySummary({ job }: { job: Job }) {
 }
 
 export function JobCard({ job, saved, saving, saveDisabled, onSave }: { job: Job; saved: boolean; saving: boolean; saveDisabled: boolean; onSave: () => void }) {
+  const key = `rolescout-viewed:${job.url}`;
+  const [viewedKey, setViewedKey] = useState<string | null>(() => {
+    try { return localStorage.getItem(key) ? key : null; } catch { return null; }
+  });
+  let viewed = viewedKey === key;
+  try { viewed ||= !!localStorage.getItem(key); } catch { /* Storage is optional. */ }
+  const markViewed = () => {
+    setViewedKey(key);
+    try { localStorage.setItem(key, new Date().toISOString()); } catch { /* Keep the in-session indicator. */ }
+  };
   return <article className="job concise-job">
     <div className="company"><span className="field-label">Company</span>{job.company}</div>
     <span className="field-label role-label">Role</span><h3>{job.title}</h3>
@@ -34,7 +45,7 @@ export function JobCard({ job, saved, saving, saveDisabled, onSave }: { job: Job
       <div><dt>Deadline</dt><dd>{job.application_deadline ? <DeadlineFlag job={job}/> : 'Not specified'}</dd></div>
     </dl>
     <div className="card-actions">
-      <div className="application-url"><span className="field-label">Application URL</span>{/^https?:\/\//i.test(job.url) ? <a href={job.url} target="_blank" rel="noreferrer" aria-label={`Open application for ${job.title}`}>{job.url} ↗</a> : <span>Unavailable</span>}</div>
+      <div className="application-url"><span className="field-label">Application URL {viewed && <span className="viewed-badge">Viewed ✓</span>}</span>{/^https?:\/\//i.test(job.url) ? <a href={job.url} onClick={markViewed} onAuxClick={event => { if (event.button === 1) markViewed(); }} target="_blank" rel="noreferrer" aria-label={`Open application for ${job.title}`}>{job.url} ↗</a> : <span>Unavailable</span>}</div>
       <button disabled={saveDisabled || saved} onClick={onSave}>{saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save role'}</button>
     </div>
   </article>;

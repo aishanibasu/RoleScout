@@ -36,7 +36,7 @@ def test_real_world_experience_phrasing(text, minimum, maximum):
     requirement = item["experience_requirements"][0]
     assert (requirement["minimum"], requirement["maximum"]) == (minimum, maximum)
     assert requirement["preference"] == "stated"
-    assert matches(item, {"level": ["Entry level", "New graduate"]}) == (minimum <= 2)
+    assert matches(item, {"level": ["Entry level", "New graduate"]}) == (minimum <= 2 and maximum is not None and maximum <= 2)
 
 
 @pytest.mark.parametrize(

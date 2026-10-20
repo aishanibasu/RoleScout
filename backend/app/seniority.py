@@ -14,21 +14,47 @@ JUNIOR = re.compile(r"\b(?:intern(?:ship)?|apprentice(?:ship)?|trainee)\b", re.I
 
 def title_level(title):
     # Supporting an executive is not the same as being that executive.
-    if SUPPORT.search(title) or JUNIOR.search(title):
+    if SUPPORT.search(title):
         return None
+    if JUNIOR.search(title) or re.search(r"\bsummer (?:analyst|associate)\b", title, re.I):
+        return "Student"
     if LEADERSHIP.search(title):
         return "Manager / leadership"
     if SENIOR.search(title):
         return "Senior"
+    if re.search(
+        r"\b(?:new|recent|university) graduate\b|\bgraduate (?:talent|development|training) program(?:me)?\b",
+        title,
+        re.I,
+    ):
+        return "New graduate"
+    if re.search(r"\b(?:entry[- ]level|junior|jr\.?)\b", title, re.I):
+        return "Entry level"
     return None
 
 
 def normalize_title_level(job):
     level = title_level(job.get("title", ""))
+    stated = [r for r in job.get("experience_requirements", []) if r.get("preference") == "stated"]
+    minimum = max((r["minimum"] for r in stated), default=0)
+    # Required experience takes precedence over optimistic titles/source labels.
+    if (
+        minimum > 2
+        and (level in EARLY or job.get("level") in EARLY)
+        and level not in {"Senior", "Manager / leadership"}
+    ):
+        level = "Senior" if minimum > 5 else "Mid-level"
+        evidence = dict(job.get("evidence", {}))
+        evidence["level"] = {
+            "status": "inferred",
+            "text": "\n".join(r["text"] for r in stated),
+            "rule": "required_experience",
+        }
+        return dict(job, level=level, evidence=evidence)
     if not level or job.get("level") == level:
         return job
     evidence = dict(job.get("evidence", {}))
-    evidence["level"] = {"status": "inferred", "text": job["title"], "rule": "senior_title"}
+    evidence["level"] = {"status": "inferred", "text": job["title"], "rule": "title_level"}
     return dict(job, level=level, evidence=evidence)
 
 
@@ -37,7 +63,7 @@ def conflicts_with_early_career(job, wanted):
     selected = set(wanted) - {"Not specified"}
     if not selected or not selected <= EARLY:
         return False
-    if title_level(job.get("title", "")):
+    if title_level(job.get("title", "")) in {"Senior", "Manager / leadership"}:
         return True
     requirements = job.get("experience_requirements", [])
     stated = [e for e in requirements if e.get("preference") == "stated"]
@@ -46,7 +72,7 @@ def conflicts_with_early_career(job, wanted):
     # Entry level uses the existing 0–2 year band. Any required minimum above it
     # is a conflict even when several requirements prevent assigning a single level.
     for requirement in stated:
-        if requirement["minimum"] <= 2:
+        if requirement["minimum"] <= (2 if "Entry level" in selected else 0):
             continue
         return True
     return False
