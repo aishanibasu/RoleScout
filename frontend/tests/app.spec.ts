@@ -416,7 +416,7 @@ test('retired sources are absent from source coverage', async ({ page }) => {
   await page.goto('/');
   const coverage = page.locator('.source-coverage');
   await coverage.locator('summary').click();
-  await expect(coverage.locator('.source-entry')).toHaveCount(13);
+  await expect(coverage.locator('.source-entry')).toHaveCount(17);
   for (const name of ['Bank of America', 'JPMorgan Chase', 'Citadel', 'Hudson Bay Capital']) {
     await expect(coverage.getByRole('link', { name })).toHaveCount(0);
   }

@@ -11,6 +11,10 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 DEFAULT_DB = Path(__file__).resolve().parents[1] / "data" / "roles.sqlite3"
 SOURCES = [
+    ("schonfeld", "Schonfeld", "https://job-boards.greenhouse.io/schonfeld", "ready"),
+    ("dvtrading", "DV Trading", "https://job-boards.greenhouse.io/dvtrading", "ready"),
+    ("millennium", "Millennium", "https://career.mlp.com/careers?domain=mlp.com", "ready"),
+    ("gts", "GTS", "https://careers-gtsx.icims.com/jobs/search", "ready"),
     ("point72", "Point72", "https://careers.point72.com/", "ready"),
     ("hft", "HFT Jobs", "https://www.hft-jobs.com/jobs", "planned"),
     ("apollo", "Apollo", "https://www.apollo.com/careers", "planned"),
@@ -119,6 +123,10 @@ def initialize(path=None):
                     "gs",
                     "ubs",
                     "bam",
+                    "schonfeld",
+                    "dvtrading",
+                    "millennium",
+                    "gts",
                 )
             ],
         )

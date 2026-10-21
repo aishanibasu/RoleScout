@@ -2,7 +2,7 @@
 
 ## Product plan
 
-Status: React frontend connected to a FastAPI/SQLite backend; 13 listing sources are connected with daily refresh schedules; all 13 sources have visible coverage status.
+Status: React frontend connected to a FastAPI/SQLite backend; 17 listing sources are connected with daily refresh schedules; all 17 sources have visible coverage status.
 Created: September 17, 2026.
 Project location: `/Users/aishanibasu/Projects/Role Searcher`.
 
@@ -64,7 +64,7 @@ Interactive API documentation: <http://127.0.0.1:8000/docs>.
 - `GET /jobs`: repeated dropdown query parameters (including `company=Point72` or `company=Ares%20Management`), `q`, `certainty=all|confirmed`, `sort=default|company|verified`, `page`, and `page_size` (maximum 100).
 - `GET /jobs/{id}`: full listing, source text, extraction evidence, and freshness.
 - `GET /filters`: available values and normalized locations.
-- `GET /sources`: all 13 configured sources, active counts, errors, and freshness status.
+- `GET /sources`: all 17 configured sources, active counts, errors, and freshness status.
 - `GET /runs`: recent collection results, including interrupted runs.
 - `GET /scheduler`: worker heartbeat, running state, and persisted source schedules.
 
@@ -497,3 +497,5 @@ Eligibility summaries distinguish stated matches from unknown or inferred criter
 this is a match to selected filters, not a guarantee of complete eligibility.
 
 Bank of America, JPMorgan, Citadel, and Hudson Bay Capital are no longer configured sources. Their direct-feed listings are excluded from search; previously saved applications are retained.
+
+Schonfeld, DV Trading, Millennium, and GTS use direct employer feeds. Apollo also uses its direct employer feed. HFT copies for these five employers are excluded from search so old aggregator records cannot reappear after employer removal. Millennium descriptions populate in background.

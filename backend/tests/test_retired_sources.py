@@ -30,7 +30,7 @@ def test_retired_sources_removed_from_existing_installations(tmp_path):
             )
     with TestClient(create_app(path)) as client:
         assert not retired.intersection(s["id"] for s in client.get("/sources").json())
-        assert len(client.get("/sources").json()) == 13
+        assert len(client.get("/sources").json()) == 17
         assert not retired.intersection(
             s["source"] for s in client.get("/scheduler").json()["sources"]
         )
