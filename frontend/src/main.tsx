@@ -70,7 +70,7 @@ function App() {
   const [strict, setStrict] = useState(initial.strict);
   const [sort, setSort] = useState(initial.sort);
   const [showFilters, setShowFilters] = useState(false);
-  const [view, setView] = useState('explore');
+  const [view, setView] = useState(new URLSearchParams(location.search).has('sheets') ? 'tracker' : 'explore');
   const [tracked, setTracked] = useState<TrackedJob[]>([]);
   const [trackingError, setTrackingError] = useState('');
   const [saving, setSaving] = useState<number | null>(null);

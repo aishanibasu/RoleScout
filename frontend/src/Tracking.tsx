@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { GoogleSheets } from './GoogleSheets';
 
 export type TrackingState = { status: string; notes: string; updated_at: string };
 export type TrackedJob = { id: number; title: string; company: string; url: string; status: string; tracking: TrackingState };
@@ -43,6 +44,7 @@ export function Tracker({ jobs, refresh }: { jobs: TrackedJob[]; refresh: () => 
   const filtered = jobs.filter(job => stage === 'All' || job.tracking.status === stage);
   return <section className="tracker" aria-label="Application tracker">
     <div className="results-heading"><div><h2>Your application tracker</h2><p>{jobs.length} saved opportunities · Stored on this computer</p></div><label>Show status<select value={stage} onChange={e => setStage(e.target.value)}>{['All', ...stages].map(value => <option key={value}>{value}</option>)}</select></label></div>
+    <GoogleSheets/>
     {filtered.map(job => <TrackedCard key={job.id} job={job} refresh={refresh} />)}
     {!filtered.length && <div className="empty"><h3>{jobs.length ? 'No jobs with this status.' : 'Your shortlist starts here.'}</h3><p>Save a role from Explore, then track your application and next steps here.</p></div>}
   </section>;

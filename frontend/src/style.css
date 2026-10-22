@@ -52,3 +52,9 @@ textarea:focus-visible{outline:3px solid #849d48;outline-offset:3px}
 .match-review{color:#805b22;font-size:12px;margin-bottom:6px}.match-confirmed{color:#315b36;font-size:12px;margin-bottom:6px}
 
 .viewed-badge { display: inline-block; margin-left: .5rem; color: #27634b; font-weight: 600; text-transform: none; letter-spacing: normal; }
+
+.sheets-panel { border: 1px solid var(--line, #dce2d6); background: #fff; border-radius: 14px; padding: 22px; margin: 20px 0; }
+.sheets-panel h3 { margin-top: 0; }
+.sheets-panel p { line-height: 1.6; }
+.sheets-panel .tracking-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.sheets-panel [role="alert"] { color: #9a3f2f; }

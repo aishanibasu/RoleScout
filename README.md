@@ -499,3 +499,31 @@ this is a match to selected filters, not a guarantee of complete eligibility.
 Bank of America, JPMorgan, Citadel, and Hudson Bay Capital are no longer configured sources. Their direct-feed listings are excluded from search; previously saved applications are retained.
 
 Schonfeld, DV Trading, Millennium, and GTS use direct employer feeds. Apollo also uses its direct employer feed. HFT copies for these five employers are excluded from search so old aggregator records cannot reappear after employer removal. Millennium descriptions populate in background.
+
+
+## Google Sheets sync
+
+In **Saved & applications**, use **Connect Google & create spreadsheet**. After Google authorization, RoleScout creates a new **RoleScout Saved Roles** spreadsheet and copies existing saved roles. New saves, status changes, notes, and removals automatically update the same spreadsheet while the local API is running. Restarting the app resumes pending syncs. Failed uploads never prevent local saves; the tracker shows the error and retries with backoff.
+
+The **Saved Roles** tab is managed by RoleScout. Edit information in the app; syncing overwrites the managed cells in that tab. Disconnecting leaves the Google spreadsheet intact. This is a single-user local app: each local installation connects its own Google account and creates its own spreadsheet. It is not a shared, multi-account hosted service.
+
+### One-time Google setup
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create or choose a project and enable the **Google Sheets API**.
+2. Configure the Google Auth consent screen. If its publishing status is **Testing**, add your Google email under test users. Google may expire testing-mode refresh tokens after seven days, requiring reconnection.
+3. Create an OAuth client of type **Web application**. Add this exact authorized redirect URI: `http://localhost:5173/api/sheets/callback`.
+4. Put the client credentials in `backend/.env` (never in frontend code or Git):
+
+   ```dotenv
+   GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your-client-secret
+   GOOGLE_REDIRECT_URI=http://localhost:5173/api/sheets/callback
+   ```
+
+5. Open RoleScout at **http://localhost:5173**, switch to **Saved & applications**, and click **Connect Google & create spreadsheet**. Sign in and allow access. Use the same localhost hostname as the registered redirect URI.
+
+The app requests the `drive.file` scope, which limits access to files created or explicitly opened with this app. It creates a spreadsheet instead of requesting access to every existing spreadsheet. The refresh token stays in ignored `backend/data/.env.google` with owner-only file permissions (or beside a custom database). OAuth client credentials are read from `backend/.env`; tokens are never sent to the frontend. Connecting the Google Drive chat plugin does not authorize RoleScout itself; this one-time OAuth setup is still required for independent background updates.
+
+Columns: Company, Role, Eligibility, Location, Deadline, Application URL, Status, Notes, Updated at. Text is written as literal cell values, so job descriptions or notes beginning with `=` cannot become spreadsheet formulas. Sync replaces the managed range atomically, avoiding duplicate appended rows after a retry.
+
+Google references: [OAuth web server flow](https://developers.google.com/identity/protocols/oauth2/web-server), [Sheets batch updates](https://developers.google.com/workspace/sheets/api/guides/batchupdate).

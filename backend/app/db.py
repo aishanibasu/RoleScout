@@ -94,6 +94,9 @@ def initialize(path=None):
             id INTEGER PRIMARY KEY CHECK(id=1),
             started_at TEXT, heartbeat_at TEXT, stopped_at TEXT);
         """)
+        from .sheets import initialize as initialize_sheets
+
+        initialize_sheets(db)
         db.executemany(
             """INSERT INTO sources(id,name,url,status) VALUES (?,?,?,?)
             ON CONFLICT(id) DO UPDATE SET name=excluded.name,url=excluded.url""",

@@ -1,4 +1,5 @@
-from contextlib import asynccontextmanager
+import asyncio
+from contextlib import asynccontextmanager, suppress
 from datetime import datetime, timedelta, timezone
 from typing import Literal, Optional
 
@@ -10,6 +11,7 @@ from .deadlines import past_recruiting_program
 from .dedup import deduplicate
 from .scheduling import status as scheduler_status
 from .search import eligibility_status, match_explanation, matches
+from .sheets import GoogleSheets
 from .tracking import router
 
 FILTER_KEYS = (
@@ -29,14 +31,23 @@ FILTER_KEYS = (
 )
 
 
-def create_app(path=None):
+def create_app(path=None, sheets_service=None):
+    sheets = sheets_service or GoogleSheets(path)
+
     @asynccontextmanager
     async def lifespan(app):
         db.initialize(path)
-        yield
+        worker = asyncio.create_task(sheets.worker())
+        try:
+            yield
+        finally:
+            worker.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker
 
     app = FastAPI(title="RoleScout API", version="0.1.0", lifespan=lifespan)
     app.include_router(router(path))
+    app.include_router(sheets.router())
 
     @app.get("/health")
     def health():

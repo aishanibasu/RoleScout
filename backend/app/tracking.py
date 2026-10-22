@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from . import db
+from .sheets import changed
 
 
 class TrackingUpdate(BaseModel):
@@ -53,6 +54,7 @@ def router(path=None):
                 "notes=excluded.notes,updated_at=excluded.updated_at",
                 (job_id, update.status, update.notes, stamp),
             )
+            changed(conn)
         return {"status": update.status, "notes": update.notes, "updated_at": stamp}
 
     @api.delete("/tracked/{job_id}")
@@ -60,6 +62,7 @@ def router(path=None):
         check_origin(request)
         with db.connect(path) as conn:
             conn.execute("DELETE FROM tracked_jobs WHERE job_id=?", (job_id,))
+            changed(conn)
         return {"removed": True}
 
     return api
