@@ -487,6 +487,8 @@ sources without pretending old data has been verified. Initial dependency setup
 still uses `uv sync` in backend and `pnpm install` in frontend; the launcher does
 not install packages or update dependencies automatically.
 
+Failed source refreshes retry after 15 minutes while the scheduler is running; successful refreshes return to the normal daily schedule. Provider `Retry-After` deadlines remain respected.
+
 Normal searches now exclude postings whose extracted deadline has passed, even
 between imports. The Deadline passed filter explicitly includes those postings
 for review. Saved applications and notes remain available. Unknown deadlines
